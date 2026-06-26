@@ -1,0 +1,1546 @@
+openapi: 3.0.0
+info:
+  title: Multi Cloud Control RESTful API
+  description: ASUS Enterprise Multi Cloud Control 以 Portal 需求列出其需要的 Restful API Response 以 Json 格式呈現
+  version: v0.0.5
+  termsOfService: "http://0.0.0.0:8117"
+  contact:
+    email: "osci_admin@asus.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+servers:
+  - url: https://api.central.iic.nchc.org.tw/mcc/api/v1
+    description: 晶創雲    
+tags:
+  - name: "User/Region"
+    description: "Region RESTful APIs"
+  - name: "User/ServiceBlackList"
+    description: "ServiceBlackList RESTful APIs"
+  - name: "User/Service"
+    description: "Service RESTful APIs"
+  - name: "Admin/Region"
+    description: "Region RESTful APIs"
+  - name: "Admin/RegionBlackList"
+    description: "RegionBlackList RESTful APIs"
+  - name: "Admin/ServiceBlackList"
+    description: "ServiceBlackList RESTful APIs"
+  - name: "Admin/Service"
+    description: "Service RESTful APIs"
+  - name: "Admin/GlobalResource"
+    description: "GlobalResource RESTful APIs"
+  - name: "Admin/RegionGlobalResourceRelation"
+    description: "Region&GlobalResource Relation RESTful APIs"
+    
+paths:
+##
+#
+#   User RESTful APIs
+#
+##
+##
+  '/project/{project-id}/regions':
+    get:
+      summary: 列出所有的 Regions
+      security:
+        - bearerAuth: []
+      tags:
+        - "User/Region"
+      parameters:
+        - $ref: '#/components/parameters/query.limit'
+        - $ref: '#/components/parameters/query.offset'
+        - $ref: '#/components/parameters/query.where'
+        - $ref: '#/components/parameters/path.projectID'
+      responses:
+        '200':
+          $ref: '#/components/responses/regions'
+        '403':
+          $ref: '#/components/responses/userPermissionDenied'
+        '500':
+          $ref: '#/components/responses/userInternalServerError'
+  '/project/{project-id}/region/{region-id}':
+    get:
+      summary: 取得指定的 Region
+      security:
+        - bearerAuth: []
+      tags:
+        - "User/Region"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+      responses:
+        '200':
+          $ref: '#/components/responses/region'
+        '403':
+          $ref: '#/components/responses/userPermissionDenied'
+        '500':
+          $ref: '#/components/responses/userInternalServerError'
+  '/project/{project-id}/region/{region-id}/services':
+    get:
+      summary: 取得指定 Region 的所有 Services
+      security:
+        - bearerAuth: []
+      tags:
+        - "User/Service"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+      responses:
+        '200':
+          $ref: '#/components/responses/services'
+        '403':
+          $ref: '#/components/responses/userPermissionDenied'
+        '500':
+          $ref: '#/components/responses/userInternalServerError'
+  '/project/{project-id}/region/{region-id}/service_blocked_entities':
+    get:
+      summary: 取得指定 Region 的所有 Service Blocked Entities
+      security:
+        - bearerAuth: []
+      tags:
+        - "User/ServiceBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+        - $ref: '#/components/parameters/query.serviceName'
+        - $ref: '#/components/parameters/query.actionName'
+      responses:
+        '200':
+          $ref: '#/components/responses/serviceBlockedEntities'
+        '403':
+          $ref: '#/components/responses/userPermissionDenied'
+        '500':
+          $ref: '#/components/responses/userInternalServerError'
+##
+#
+#   Admin RESTful APIs
+#
+##
+##
+  '/admin/region':
+    post:
+      summary: 建立 Region
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/Region"
+      requestBody:
+        $ref: '#/components/requestBodies/createRegionInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/region'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '409':
+          $ref: '#/components/responses/adminRegionIsAlreadyExist'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/regions':
+    get:
+      summary: 列出所有的 Regions
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/Region"
+      parameters:
+        - $ref: '#/components/parameters/query.limit'
+        - $ref: '#/components/parameters/query.offset'
+        - $ref: '#/components/parameters/query.where'
+      responses:
+        '200':
+          $ref: '#/components/responses/regions'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/region/{region-id}':
+    get:
+      summary: 取得指定 Region
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/Region"
+      parameters:
+        - $ref: '#/components/parameters/path.regionID'
+      responses:
+        '200':
+          $ref: '#/components/responses/region'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/adminRegionNotFound'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+    delete:
+      summary: 刪除指定 Region
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/Region"
+      parameters:
+        - $ref: '#/components/parameters/path.regionID'
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+    put:
+      summary: 修改指定的 Region
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/Region"
+      parameters:
+        - $ref: '#/components/parameters/path.regionID'
+      requestBody:
+        $ref: '#/components/requestBodies/updateRegionInput'
+      responses:
+        '200':
+          $ref: '#/components/responses/region'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/adminRegionNotFound'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/region_blocked_entities':
+    get:
+      summary: 列出所有 Region Blocked Entities
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/RegionBlackList"
+      parameters:
+        - $ref: '#/components/parameters/query.limit'
+        - $ref: '#/components/parameters/query.offset'
+        - $ref: '#/components/parameters/query.where'
+      responses:
+        '200':
+          $ref: '#/components/responses/regionBlockedEntities'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/project/{project-id}/region_blocked_entities':
+    get:
+      summary: 列出指定 Project 的所有 Region Blocked Entities
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/RegionBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/query.limit'
+        - $ref: '#/components/parameters/query.offset'
+        - $ref: '#/components/parameters/query.where'
+      responses:
+        '200':
+          $ref: '#/components/responses/regionBlockedEntities'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/project/{project-id}/region/{region-id}/region_blocked_entity':
+    post:
+      summary: 建立 Region Blocked Entity
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/RegionBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+      requestBody:
+        $ref: '#/components/requestBodies/updateInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/regionBlockedEntity'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/adminCreateRegionBlockedEntity404Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+    get:
+      summary: 取得指定 Project 的指定 Region 的所有 Region Blocked Entity
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/RegionBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+      responses:
+        '200':
+          $ref: '#/components/responses/regionBlockedEntity'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/adminGetRegionBlockedEntity404Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+    delete:
+      summary: 刪除指定 Project 的指定 Region 的所有 Region Blocked Entity
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/RegionBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/common404Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+    put:
+      summary: 更新指定的 Region Blocked Entity
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/RegionBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+      requestBody:
+        $ref: '#/components/requestBodies/updateInput'
+      responses:
+        '200':
+          $ref: '#/components/responses/regionBlockedEntity'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/adminGetRegionBlockedEntity404Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/project/{project-id}/region/{region-id}/service_blocked_entities':
+    get:
+      summary: 列出指定 Project 的指定 Region 的所有 Service Blocked Entities
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/ServiceBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+        - $ref: '#/components/parameters/query.limit'
+        - $ref: '#/components/parameters/query.offset'
+        - $ref: '#/components/parameters/query.where'
+      responses:
+        '200':
+          $ref: '#/components/responses/serviceBlockedEntities'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/project/{project-id}/region/{region-id}/service_blocked_entity':
+    post:
+      summary: 建立 Service Blocked Entity
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/ServiceBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+      requestBody:
+        $ref: '#/components/requestBodies/createServiceBlockedEntityInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/serviceBlockedEntity'
+        '400':
+          $ref: '#/components/responses/adminCreateServiceBlockedEntity400Errors'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/adminCreateRegionBlockedEntity404Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+    get:
+      summary: 取得指定 Project 的指定 Region 的所有 Region Blocked Entity
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/ServiceBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+      responses:
+        '200':
+          $ref: '#/components/responses/serviceBlockedEntity'
+        '400':
+          $ref: '#/components/responses/adminGetServiceBlockedEntity400Errors'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/adminGetServiceBlockedEntity404Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+    delete:
+      summary: 刪除指定 Project 的指定 Region 的所有 Service Blocked Entity
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/ServiceBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+        - $ref: '#/components/parameters/query.serviceName'
+        - $ref: '#/components/parameters/query.actionName'
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/common404Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+    put:
+      summary: 更新指定 Project 的指定 Region 的所有 Service Blocked Entity
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/ServiceBlackList"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+      requestBody:
+        $ref: '#/components/requestBodies/createServiceBlockedEntityInput'
+      responses:
+        '200':
+          $ref: '#/components/responses/serviceBlockedEntity'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/adminGetRegionBlockedEntity404Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/project/{project-id}/region/{region-id}/services':
+    get:
+      summary: 取得指定 Project 的指定 Region 的所有 Services
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/Service"
+      parameters:
+        - $ref: '#/components/parameters/path.projectID'
+        - $ref: '#/components/parameters/path.regionID'
+      responses:
+        '200':
+          $ref: '#/components/responses/services'
+        '403':
+          $ref: '#/components/responses/userPermissionDenied'
+        '500':
+          $ref: '#/components/responses/userInternalServerError'
+  '/admin/global_resources':
+    get:
+      summary: 列出所有的 Global Services
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/GlobalResource"
+      parameters:
+        - $ref: '#/components/parameters/query.limit'
+        - $ref: '#/components/parameters/query.offset'
+        - $ref: '#/components/parameters/query.where'
+      responses:
+        '200':
+          $ref: '#/components/responses/globalResources'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/global_resource':
+    post:
+      summary: 建立 Global Resource
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/GlobalResource"
+      requestBody:
+        $ref: '#/components/requestBodies/createGlobalResourceInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/globalResource'
+        '400':
+          $ref: '#/components/responses/adminCreateGlobalResource400Errors'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/global_resource/{global-resource-id}':
+    get:
+      summary: 取得指定的 Global Resource
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/GlobalResource"
+      parameters:
+        - $ref: '#/components/parameters/path.globalResourceID'
+      responses:
+        '200':
+          $ref: '#/components/responses/globalResource'
+        '400':
+          $ref: '#/components/responses/adminGetServiceBlockedEntity400Errors'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/adminGetGlobalResource404Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+    delete:
+      summary: 刪除指定的 Global Resource
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/GlobalResource"
+      parameters:
+        - $ref: '#/components/parameters/path.globalResourceID'
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+    put:
+      summary: 更新指定的 Global Resource
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/GlobalResource"
+      parameters:
+        - $ref: '#/components/parameters/path.globalResourceID'
+      requestBody:
+        $ref: '#/components/requestBodies/updateGlobalResourceInput'
+      responses:
+        '200':
+          $ref: '#/components/responses/globalResource'
+        '400':
+          $ref: '#/components/responses/midIncorrectFormat'
+        '403':
+          $ref: '#/components/responses/common403Errors'
+        '404':
+          $ref: '#/components/responses/adminGetGlobalResource404Errors'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  
+  '/admin/relation':
+    post:
+      summary: 建立 Region 與 Global Resource 的關聯
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/RegionGlobalResourceRelation"
+      requestBody:
+        $ref: '#/components/requestBodies/createRegionGlobalResourceRelationInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/regionGlobalResourceRelation'
+        '400':
+          $ref: '#/components/responses/adminCreationIsNotAllowed'
+        '404':
+          $ref: '#/components/responses/adminRegionOrGlobalResourceNotFound'
+        '409':
+          $ref: '#/components/responses/adminRegionAndGlobalResourcePairIsAlreadyExist'
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+  '/admin/relation/region/:region-id/global_resource/:global-resource-id':
+    delete:
+      summary: 刪除 Region 與 Global Resource 的關聯
+      security:
+        - bearerAuth: []
+      tags:
+        - "Admin/RegionGlobalResourceRelation"
+      parameters:
+        - $ref: '#/components/parameters/path.regionID'
+        - $ref: '#/components/parameters/path.globalResourceID'
+      responses:
+        '500':
+          $ref: '#/components/responses/adminInternalServerError'
+components:
+  ##
+  #
+  # securitySchemes
+  #
+  ##
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  ##
+  #
+  # Parameter
+  #
+  ##
+  parameters:
+    path.projectID:
+      in: path
+      name: project-id
+      schema:
+        type: string
+      required: true
+      description: "IAM Project ID"
+    path.regionID:
+      in: path
+      name: region-id
+      schema:
+        type: string
+      required: true
+      description: "MCC Region ID"
+    path.globalResourceID:
+      in: path
+      name: global-resource-id
+      schema:
+        type: string
+      required: true
+      description: "MCC Global Resource ID"
+    query.limit:
+      in: query
+      name: limit
+      schema:
+        type: integer
+        minimum: -1
+        default: 100
+      required: false
+      description: "-1表示全部顯示"
+    query.offset:
+      in: query
+      name: offset
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      required: false
+      description: "從第幾筆開始取得"
+    query.where:
+      in: query
+      name: where
+      schema:
+        type: array
+        items:
+          type: string
+      description: "此功能可以帶入欄位及值作為查詢條件，來篩選出滿足條件的清單。"
+    query.serviceName:
+      in: query
+      name: serviceName
+      schema:
+        type: string
+      required: false
+      description: "指定Service名稱"
+    query.actionName:
+      in: query
+      name: actionName
+      schema:
+        type: string
+      required: false
+      description: "指定Action名稱"
+      
+  ##
+  #
+  # requestBodies
+  #
+  ##
+  requestBodies:
+    createRegionGlobalResourceRelationInput:
+      description: "Create Region Global Resource Relation Input Structure"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/createRegionGlobalResourceRelationInput'
+          examples:
+            basic:
+              $ref: '#/components/examples/createRegionGlobalResourceRelationInput'
+    createRegionInput:
+      description: "Create Region Input Structure"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/createRegionInput'
+          examples:
+            basic:
+              $ref: '#/components/examples/createRegionInput'
+    updateInput:
+      description: "Update Input Structure"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/updateInput'
+          examples:
+            basic:
+              $ref: '#/components/examples/updateInput'
+    updateGlobalResourceInput:
+      description: "Update Global Resource Input Structure"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/updateGlobalResourceInput'
+          examples:
+            basic:
+              $ref: '#/components/examples/updateGlobalResourceInput'
+    createServiceBlockedEntityInput:
+      description: "Create Service Blocked Entity Input Structure"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/createServiceBlockedEntityInput'
+          examples:
+            basic:
+              $ref: '#/components/examples/createServiceBlockedEntityInput'
+            wildcard:
+              $ref: '#/components/examples/createServiceBlockedEntityWildcardInput'
+    createGlobalResourceInput:
+      description: "Create Global Resource Input Structure"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/createGlobalResourceInput'
+          examples:
+            basic:
+              $ref: '#/components/examples/createGlobalResourceInput'
+    updateRegionInput:
+      description: "Update Region Input Structure"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/updateRegionInput'
+          examples:
+            basic:
+              $ref: '#/components/examples/updateRegionInput'
+
+  ##
+  #
+  # Responses
+  #
+  ##
+  responses:
+    userPermissionDenied:
+      description: "Permission Denied"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            permission denied:
+              $ref: '#/components/examples/midPermissionDenied'
+            membership has been frozen:
+              $ref: '#/components/examples/midMembershipHasBeenFrozen'
+    midIncorrectFormat:
+      description: "Incorrect Format"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            incorrect format:
+              $ref: '#/components/examples/midIncorrectFormat'
+    userInternalServerError:
+      description: "Internal Server Error"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            internal server error:
+              $ref: '#/components/examples/userInternalServerError'
+    userRegionNotFound:
+      description: "Region Not Found"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            region not found:
+              $ref: '#/components/examples/userRegionNotFound'
+    common404Errors:
+      description: "Delete Region Blocked Entity 404 Errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            project not found:
+              $ref: '#/components/examples/adminProjectNotFound'
+    common403Errors:
+      description: "Permission Denied"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            permission denied:
+              $ref: '#/components/examples/midPermissionDenied'
+    adminInternalServerError:
+      description: "Internal Server Error"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            internal server error:
+              $ref: '#/components/examples/adminInternalServerError'
+    adminRegionIsAlreadyExist:
+      description: "Region Is Already Exist"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            region not found:
+              $ref: '#/components/examples/adminRegionIsAlreadyExist'
+    adminRegionNotFound:
+      description: "Region Not Found"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            region not found:
+              $ref: '#/components/examples/adminRegionNotFound'
+    adminCreateServiceBlockedEntity400Errors:
+      description: "Create Region Blocked Entity 400 Errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            incorrect format:
+              $ref: '#/components/examples/midIncorrectFormat'
+            project not found:
+              $ref: '#/components/examples/adminProjectNotFound'
+            region not found:
+              $ref: '#/components/examples/adminRegionNotFound'
+            wildcard is not allowed in service name:
+              $ref: '#/components/examples/adminWildcardIsNotAllowedInServiceName'
+            action name cannot be empty:
+              $ref: '#/components/examples/adminActionNameCannotBeEmpty'
+            service name is not allowed:
+              $ref: '#/components/examples/adminServiceNameIsNotAllowed'
+            action not found:
+              $ref: '#/components/examples/adminActionNotFound'
+    adminGetServiceBlockedEntity400Errors:
+      description: "Get Service Blocked Entity 400 Errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            incorrect format:
+              $ref: '#/components/examples/midIncorrectFormat'
+            action name cannot be empty:
+              $ref: '#/components/examples/adminActionNameCannotBeEmpty'
+    adminCreateGlobalResource400Errors:
+      description: "Create Global Resource 400 Errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            incorrect format:
+              $ref: '#/components/examples/midIncorrectFormat'
+            wildcard is not allowed in service name:
+              $ref: '#/components/examples/adminWildcardIsNotAllowedInServiceName'
+            service name is not allowed:
+              $ref: '#/components/examples/adminServiceNameIsNotAllowed'
+    adminCreateRegionBlockedEntity404Errors:
+      description: "Create Region Blocked Entity 404 Errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            project not found:
+              $ref: '#/components/examples/adminProjectNotFound'
+            region not found:
+              $ref: '#/components/examples/adminRegionNotFound'
+    adminGetRegionBlockedEntity404Errors:
+      description: "Get Region Blocked Entity 404 Errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            project not found:
+              $ref: '#/components/examples/adminProjectNotFound'
+            region blocked entity not found:
+              $ref: '#/components/examples/adminRegionBlockedEntityNotFound'
+    adminGetServiceBlockedEntity404Errors:
+      description: "Get Service Blocked Entity 404 Errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            project not found:
+              $ref: '#/components/examples/adminProjectNotFound'
+            service blocked entity not found:
+              $ref: '#/components/examples/adminServiceBlockedEntityNotFound'
+    adminGetGlobalResource404Errors:
+      description: "Get Global Resource 404 Errors"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            global resource not found:
+              $ref: '#/components/examples/adminGlobalResourceNotFound'
+    adminRegionOrGlobalResourceNotFound:
+      description: "Region or Global Resource not found"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            internal server error:
+              $ref: '#/components/examples/adminRegionOrGlobalResourceNotFound'
+    adminRegionAndGlobalResourcePairIsAlreadyExist:
+      description: "Region and GlobalResource pair is already exist"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            internal server error:
+              $ref: '#/components/examples/adminRegionAndGlobalResourcePairIsAlreadyExist'
+    adminCreationIsNotAllowed:
+      description: "creation is not allowed when global resource is public"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+          examples:
+            internal server error:
+              $ref: '#/components/examples/adminCreationIsNotAllowed'
+    noContent:
+      description: No Content
+    regions:
+      description: "Regions"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/regions'
+          examples:
+            ok:
+              $ref: '#/components/examples/regions'
+    region:
+      description: "Region"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/region'
+          examples:
+            ok:
+              $ref: '#/components/examples/region'
+    services:
+      description: "Services"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/services'
+          examples:
+            ok:
+              $ref: '#/components/examples/services'
+    regionBlockedEntity:
+      description: "Region Blocked Entity"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/regionBlockedEntity'
+          examples:
+            ok:
+              $ref: '#/components/examples/regionBlockedEntity'
+    regionBlockedEntities:
+      description: "Region Blocked Entities"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/regionBlockedEntities'
+          examples:
+            ok:
+              $ref: '#/components/examples/regionBlockedEntities'
+    serviceBlockedEntity:
+      description: "Service Blocked Entity"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/serviceBlockedEntity'
+          examples:
+            ok:
+              $ref: '#/components/examples/serviceBlockedEntity'
+    serviceBlockedEntities:
+      description: "Service Blocked Entities"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/serviceBlockedEntities'
+          examples:
+            ok:
+              $ref: '#/components/examples/serviceBlockedEntities'
+    globalResource:
+      description: "Global Resource"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/globalResource'
+          examples:
+            ok:
+              $ref: '#/components/examples/globalResource'
+    globalResources:
+      description: "Global Resources"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/globalResources'
+          examples:
+            ok:
+              $ref: '#/components/examples/globalResources'
+    regionGlobalResourceRelation:
+      description: "Region & Global Resource Relation"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/regionGlobalResourceRelation'
+          examples:
+            ok:
+              $ref: '#/components/examples/regionGlobalResourceRelation'
+    
+  ##
+  #
+  # Examples
+  #
+  ##
+  examples:
+  ## resource examples
+    midPermissionDenied:
+      value:
+        errorCode: 12000001
+        message: permission denied
+    midMembershipHasBeenFrozen:
+      value:
+        errorCode: 12000003
+        message: the membership has been frozen. please contact the tenant admin
+    midIncorrectFormat:
+      value:
+        errorCode: 12000005
+        message: incorrect format of authentication
+    userInternalServerError:
+      value:
+        errorCode: 13020000
+        message: internal server error
+    userRegionNotFound:
+      value:
+        errorCode: 13020002
+        message: region not found
+    adminInternalServerError:
+      value:
+        errorCode: 13010002
+        message: internal server error
+    adminRegionIsAlreadyExist:
+      value:
+        errorCode: 13010003
+        message: region is already exist
+    adminRegionNotFound:
+      value:
+        errorCode: 13010004
+        message: region not found
+    adminRegionBlockedEntityNotFound:
+      value:
+        errorCode: 13010006
+        message: region blocked entity not found
+    adminServiceBlockedEntityNotFound:
+      value:
+        errorCode: 13010008
+        message: service blocked entity not found
+    adminGlobalResourceNotFound:
+      value:
+        errorCode: 13010010
+        message: global resource not found
+    adminProjectNotFound:
+      value:
+        errorCode: 13010011
+        message: project not found
+    adminWildcardIsNotAllowedInServiceName:
+      value:
+        errorCode: 13010013
+        message: wildcard (*) is not allowed in service name
+    adminActionNameCannotBeEmpty:
+      value:
+        errorCode: 13010014
+        message: action name cannot be empty
+    adminServiceNameIsNotAllowed:
+      value:
+        errorCode: 13010015
+        message: service name is not allowed
+    adminActionNotFound:
+      value:
+        errorCode: 13010016
+        message: action not found
+    adminRegionOrGlobalResourceNotFound:
+      value:
+        errorCode: 13010020
+        message: region or global resource not found
+    adminRegionAndGlobalResourcePairIsAlreadyExist:
+      value:
+        errorCode: 13010021
+        message: region and global resource pair is already exist
+    adminCreationIsNotAllowed:
+      value:
+        errorCode: 13010022
+        message: creation is not allowed when global resource is public
+    regions:
+      value:
+        regions:
+        - id: 2319e081-39ab-4d33-bdb9-cb8983076692
+          name: MyRegion
+          geteway_host: '192.168.88.166:8084'
+          portal_host: '192.168.88.166:8084'
+          description: MyDescription
+          extra: {}
+          visibility: false
+          created_at: '2025-04-18T02:36:52Z'
+          updated_at: '2025-04-18T02:36:52Z'
+        total: 1
+    region:
+      value:
+        id: 2319e081-39ab-4d33-bdb9-cb8983076692
+        name: MyRegion
+        geteway_host: '192.168.88.166:8084'
+        portal_host: '192.168.88.166:8084'
+        description: MyDescription
+        extra: {}
+        visibility: false
+        created_at: '2025-04-18T02:36:52Z'
+        updated_at: '2025-04-18T02:36:52Z'
+    services:
+      value:
+        services:
+        - name: iam
+          list_actions_endpoint: 'http://192.168.88.166:8000/iam/api/v1/actions'
+        - name: rds
+          list_actions_endpoint: 'http://192.168.88.166:8000/rds/api/v1/actions'
+        total: 1
+    regionBlockedEntities:
+      value:
+        entities:
+        - id: 5d84ccaa-7547-45b9-b011-8251399c2e8f
+          region_id: 2319e081-39ab-4d33-bdb9-cb8983076692
+          project_id: 4d5fb274-059a-448a-82da-5ca0a0c1468b
+          description: MyDescription
+          extra: {}
+          created_at: '2025-04-18T02:36:52Z'
+          updated_at: '2025-04-18T02:36:52Z'
+        total: 1
+    regionBlockedEntity:
+      value:
+        id: 5d84ccaa-7547-45b9-b011-8251399c2e8f
+        region_id: 2319e081-39ab-4d33-bdb9-cb8983076692
+        project_id: 4d5fb274-059a-448a-82da-5ca0a0c1468b
+        description: MyDescription
+        extra: {}
+        created_at: '2025-04-18T02:36:52Z'
+        updated_at: '2025-04-18T02:36:52Z'
+    serviceBlockedEntities:
+      value:
+        entities:
+        - id: f70cdfd7-6db1-4c46-894d-2bcb5a9d1621
+          region_id: 2319e081-39ab-4d33-bdb9-cb8983076692
+          project_id: 4d5fb274-059a-448a-82da-5ca0a0c1468b
+          service_name: iam
+          action_name: user:ListProjects
+          endpoint: /iam/api/v1/projects
+          method: GET
+          description: 
+          extra: {}
+          created_at: '2025-04-18T07:24:06Z'
+          updated_at: '2025-04-18T08:19:56Z'
+        total: 1
+    serviceBlockedEntity:
+      value:
+        id: f70cdfd7-6db1-4c46-894d-2bcb5a9d1621
+        region_id: 2319e081-39ab-4d33-bdb9-cb8983076692
+        project_id: 4d5fb274-059a-448a-82da-5ca0a0c1468b
+        service_name: iam
+        action_name: user:ListProjects
+        endpoint: /iam/api/v1/projects
+        method: GET
+        description: 
+        extra: {}
+        created_at: '2025-04-18T07:24:06Z'
+        updated_at: '2025-04-18T08:19:56Z'
+    globalResources:
+      value:
+        resources:
+        - id: ff07dd87-b1ca-4864-ae0a-fcc559a26aa7
+          service_name: vps
+          type: flavor
+          metadata: e30=
+          description: bbb
+          extra: {}
+          acl: ["00000000-0000-0000-0000-000000000001"]
+          created_at: '2025-04-23T06:48:06Z'
+          updated_at: '2025-04-23T06:48:06Z'
+          public: false
+          parentID: d70cdfd7-6db1-4c46-894d-2bcb5a9d1622
+        total: 1
+    globalResource:
+      value:
+        id: ff07dd87-b1ca-4864-ae0a-fcc559a26aa7
+        service_name: vps
+        type: flavor
+        metadata: {}
+        description: bbb
+        extra: {}
+        acl: null
+        created_at: '2025-04-23T06:48:06Z'
+        updated_at: '2025-04-23T06:48:06Z'
+        public: true
+        parentID: d70cdfd7-6db1-4c46-894d-2bcb5a9d1622
+    createRegionInput:
+      value:
+        name: MyRegion
+        gatewayHost: '192.168.88.166:8084'
+        portalHost: '192.168.88.166:8084'
+        description: MyDescription
+        extra: {}
+        visibility: true
+    updateInput:
+      value:
+        description: MyDescription
+        extra: {}
+    updateRegionInput:
+      value:
+        description: MyDescription
+        extra: {}
+        visibility: true
+    updateGlobalResourceInput:
+      value:
+        description: MyDescription
+        extra: {}
+        public: true
+    createServiceBlockedEntityInput:
+      value:
+        serviceName: iam
+        actionName: user:ListProjects
+        description: MyDescription
+        extra: {}
+    createServiceBlockedEntityWildcardInput:
+      value:
+        serviceName: iam
+        actionName: '*'
+        description: MyDescription
+        extra: {}
+    createGlobalResourceInput:
+      value:
+        serviceName: vps
+        type: flavor
+        metadata: {}
+        description: MyDescription
+        extra: {}
+        public: true
+        parentID: 5eb46e33-7d00-4673-8189-9b93adbd9d0a
+    createRegionGlobalResourceRelationInput:
+      value:
+        regionID: 00000000-0000-0000-0000-000000000001
+        globalResourceID: 5eb46e33-7d00-4673-8189-9b93adbd9d0a
+    regionGlobalResourceRelation:
+      value:
+        regionID: 00000000-0000-0000-0000-000000000001
+        globalResourceID: 5eb46e33-7d00-4673-8189-9b93adbd9d0a
+        created_at: '2025-04-23T06:48:06Z'
+  ##
+  #
+  # Schema
+  ##
+  schemas:
+  ## resource schema
+    error:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        message:
+          type: string
+    regions:
+      type: object
+      properties:
+        regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/region'
+        total:
+          type: integer
+    region:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        gatewayHost:
+          type: string
+        portalHost:
+          type: string
+        description:
+          type: string
+        extra:
+          type: string
+        visibility:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+          description: UTC Time (RFC3339)
+        updatedAt:
+          type: string
+          format: date-time
+          description: UTC Time (RFC3339)
+    services:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/service'
+        total:
+          type: integer
+    service:
+      type: object
+      properties:
+        name:
+          type: string
+        listActionsEndpoint:
+          type: string
+    regionBlockedEntities:
+      properties:
+        regionBlockedEntities:
+          type: array
+          items:
+            $ref: '#/components/schemas/regionBlockedEntity'
+        total:
+          type: integer
+    regionBlockedEntity:
+      type: object
+      properties:
+        id:
+          type: string
+        regionID:
+          type: string
+        projectID:
+          type: string
+        description:
+          type: string
+        extra:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          description: UTC Time (RFC3339)
+        updatedAt:
+          type: string
+          format: date-time
+          description: UTC Time (RFC3339)
+    serviceBlockedEntities:
+      properties:
+        serviceBlockedEntities:
+          type: array
+          items:
+            $ref: '#/components/schemas/serviceBlockedEntity'
+        total:
+          type: integer
+    serviceBlockedEntity:
+      type: object
+      properties:
+        id:
+          type: string
+        regionID:
+          type: string
+        projectID:
+          type: string
+        serviceName:
+          type: string
+        actionName:
+          type: string
+        endpoint:
+          type: string
+        method:
+          type: string
+        description:
+          type: string
+        extra:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          description: UTC Time (RFC3339)
+        updatedAt:
+          type: string
+          format: date-time
+          description: UTC Time (RFC3339)
+    globalResources:
+      properties:
+        globalResources:
+          type: array
+          items:
+            $ref: '#/components/schemas/globalResource'
+        total:
+          type: integer
+    globalResource:
+      type: object
+      properties:
+        id:
+          type: string
+        serviceName:
+          type: string
+        type:
+          type: string
+        metadata:
+          type: string
+        description:
+          type: string
+        extra:
+          type: string
+        acl:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+          description: UTC Time (RFC3339)
+        updatedAt:
+          type: string
+          format: date-time
+          description: UTC Time (RFC3339)
+        public:
+          type: boolean
+        parentID:
+          type: string
+    createRegionInput:
+      type: object
+      properties:
+        name:
+          type: string
+        gatewayHost:
+          type: string
+        portalHost:
+          type: string
+        description:
+          type: string
+        extra:
+          type: string
+        visibility:
+          type: boolean
+    updateInput:
+      type: object
+      properties:
+        description:
+          type: string
+        extra:
+          type: string
+    updateGlobalResourceInput:
+      type: object
+      properties:
+        description:
+          type: string
+        extra:
+          type: string
+        public:
+          type: boolean
+    updateRegionInput:
+      type: object
+      properties:
+        description:
+          type: string
+        extra:
+          type: string
+        visibility:
+          type: boolean
+    createServiceBlockedEntityInput:
+      type: object
+      properties:
+        serviceName:
+          type: string
+        type:
+          type: string
+        actionName:
+          type: string
+        description:
+          type: string
+        extra:
+          type: string
+        public:
+          type: boolean
+    createRegionGlobalResourceRelationInput:
+      type: object
+      properties:
+        regionID:
+          type: string
+        globalResourceID:
+          type: string
+    regionGlobalResourceRelation:
+      type: object
+      properties:
+        regionID:
+          type: string
+        globalResourceID:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          description: UTC Time (RFC3339)
+    createGlobalResourceInput:
+      type: object
+      properties:
+        serviceName:
+          type: string
+        metadata:
+          type: string
+        description:
+          type: string
+        extra:
+          type: string 
+        public:
+          type: boolean
+        parentID:
+          type: string

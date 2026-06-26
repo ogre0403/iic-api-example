@@ -1,0 +1,17 @@
+@PROTOCOL = {{$dotenv API_PROTOCOL}}
+@HOST = {{$dotenv CENTRAL_HOST}}
+@PROJECT = {{$dotenv PROJECT_ID}}
+@TOKEN = {{$dotenv API_TOKEN}}
+
+@SERVICE=mcc
+
+@BASE_URL = {{PROTOCOL}}://{{HOST}}/{{SERVICE}}/api/v1
+
+
+
+
+### List Region
+
+GET {{BASE_URL}}/project/{{PROJECT}}/regions HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}

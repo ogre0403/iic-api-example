@@ -1,0 +1,27 @@
+@PROTOCOL = {{$dotenv API_PROTOCOL}}
+@HOST = {{$dotenv CENTRAL_HOST}}
+@TOKEN = {{$dotenv API_TOKEN}}
+
+@SERVICE=iam
+
+@BASE_URL = {{PROTOCOL}}://{{HOST}}/{{SERVICE}}/api/v1
+
+
+
+
+### List Project
+# @name projectList
+
+GET {{BASE_URL}}/projects HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+@projectId={{projectList.response.body.$.projects[?(@.project.displayName=='NCHC-可信賴雲開發測試計畫-II')].project.projectId}}
+
+
+### Get Project
+# @name projectGet
+
+GET {{BASE_URL}}/project/{{projectId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}

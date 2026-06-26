@@ -1,0 +1,61 @@
+@PROTOCOL = {{$dotenv API_PROTOCOL}}
+@HOST = {{$dotenv AI_TRUST_HOST}}
+@PROJECT = {{$dotenv PROJECT_ID}}
+@TOKEN = {{$dotenv API_TOKEN}}
+@SERVICE = vps
+@BASE_URL = {{PROTOCOL}}://{{HOST}}/{{SERVICE}}/api/v1/project/{{PROJECT}}
+
+
+### Create Floating IP
+# @name FloatingIPCreate
+POST {{BASE_URL}}/floatingips HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+    "name": "test-fip"
+}
+
+@testFloatingIPId={{FloatingIPCreate.response.body.$.id}}
+
+
+### List Floating IP
+# @name FloatingIPList
+GET {{BASE_URL}}/floatingips HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+@activeFloatingIPId={{FloatingIPList.response.body.$.floating_ips[?(@.status=='ACTIVE')].id}}
+
+
+### Get Floating IP
+# @name FloatingIPGet
+GET {{BASE_URL}}/floatingips/{{testFloatingIPId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+
+### Update Floating IP
+# @name FloatingIPUpdate
+PUT {{BASE_URL}}/floatingips/{{activeFloatingIPId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+    "name": "new-name",
+    "reserved": true
+}
+
+
+### Delete Floating IP
+# @name FloatingIPDelete
+DELETE {{BASE_URL}}/floatingips/{{testFloatingIPId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+
+### Disassociate Floating IP
+# @name FloatinIPDisassociate
+POST {{BASE_URL}}/floatingips/{{activeFloatingIPId}}/disassociate HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}

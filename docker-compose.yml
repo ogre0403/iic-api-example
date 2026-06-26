@@ -1,0 +1,9 @@
+services:
+  api-docs:
+    image: nginx:alpine
+    container_name: iic-api-docs
+    ports:
+      - "8080:80"
+    volumes:
+      - ./swagger:/usr/share/nginx/html:ro
+    restart: unless-stopped

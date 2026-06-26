@@ -1,0 +1,79 @@
+@PROTOCOL = {{$dotenv API_PROTOCOL}}
+@HOST = {{$dotenv AI_TRUST_HOST}}
+@PROJECT = {{$dotenv PROJECT_ID}}
+@TOKEN = {{$dotenv API_TOKEN}}
+@SERVICE = vps
+@BASE_URL = {{PROTOCOL}}://{{HOST}}/{{SERVICE}}/api/v1/project/{{PROJECT}}
+
+
+
+### Create Security Group
+# @name SecurityGroupCreate
+POST {{BASE_URL}}/security_groups/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+    "name":"test-security-group",
+    "description":"test security group"
+}
+
+@testSecurityGroupId={{SecurityGroupCreate.response.body.$.id}}
+
+
+### List Security Group
+# @name SecurityGroupList
+GET {{BASE_URL}}/security_groups
+?detail=true
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+
+### Get Specific Security Group
+# @name SecurityGroupGet
+GET {{BASE_URL}}/security_groups/{{testSecurityGroupId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+
+### Update Security Group
+# @name SecurityGroupUpdate
+PUT {{BASE_URL}}/security_groups/{{testSecurityGroupId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+    "name": "new-security-group",
+    "description": "new security group"
+}
+
+
+### Delete Security Group
+# @name SecurityGroupDelete
+DELETE {{BASE_URL}}/security_groups/{{testSecurityGroupId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+
+### Create Security Group Rule
+# @name SecurityGroupRuleCreate
+POST {{BASE_URL}}/security_groups/{{testSecurityGroupId}}/rules HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+    "direction": "ingress",
+    "protocol": "tcp",
+    "remote_cidr": "0.0.0.0/0",
+    "port_min": 22,
+    "port_max": 22
+}
+
+@testRuleId={{SecurityGroupRuleCreate.response.body.$.rules[0].id}}
+
+
+### Delete Security Group Rule
+# @name SecurityGroupRuleDelete
+DELETE {{BASE_URL}}/security_groups/{{testSecurityGroupId}}/rules/{{testRuleId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}

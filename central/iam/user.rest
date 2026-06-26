@@ -1,0 +1,16 @@
+@PROTOCOL = {{$dotenv API_PROTOCOL}}
+@HOST = {{$dotenv CENTRAL_HOST}}
+@TOKEN = {{$dotenv API_TOKEN}}
+
+@SERVICE=iam
+
+@BASE_URL = {{PROTOCOL}}://{{HOST}}/{{SERVICE}}/api/v1
+
+
+
+### Get User
+# @name UserGet
+GET {{BASE_URL}}/user HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+

@@ -1,0 +1,156 @@
+@PROTOCOL = {{$dotenv API_PROTOCOL}}
+@HOST = {{$dotenv AI_TRUST_HOST}}
+@PROJECT = {{$dotenv PROJECT_ID}}
+@TOKEN = {{$dotenv API_TOKEN}}
+@SERVICE = vps
+@BASE_URL = {{PROTOCOL}}://{{HOST}}/{{SERVICE}}/api/v1/project/{{PROJECT}}
+@VRM_BASE_URL ={{PROTOCOL}}://{{HOST}}/vrm/api/v1/project/{{PROJECT}}
+
+### List Flavor
+# @name FlavorList
+GET {{BASE_URL}}/flavors HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+### List Network
+# @name NetworkList
+GET {{BASE_URL}}/networks/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+### List Security Group
+# @name SecurityGroupList
+GET {{BASE_URL}}/security_groups HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+
+### List Floating IP
+# @name FloatingIPList
+GET {{BASE_URL}}/floatingips HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+### List Tags
+# @name TagsList
+GET {{VRM_BASE_URL}}/tags HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+### List Volume
+# @name VolumeList
+GET {{BASE_URL}}/volumes HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+@imageId={{TagsList.response.body.$.tags[0].id}}
+@networkId={{NetworkList.response.body.$.networks[0].id}}
+@flavorId={{FlavorList.response.body.$.flavors[0].id}}
+@sgId={{SecurityGroupList.response.body.$.security_groups[0].id}}
+@fipId={{FloatingIPList.response.body.$.floating_ips[0].id}}
+@volId={{VolumeList.response.body.$.volumes[0].id}}
+
+
+########### Server API ###########
+
+### Create Server
+# @name ServerCreate
+POST {{BASE_URL}}/servers HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+  "name": "test-server",
+  "description": "",
+  "image_id": "{{imageId}}",
+  "flavor_id": "{{flavorId}}",
+  "nics": [
+    {
+      "network_id": "{{networkId}}",
+      "sg_ids": [
+        "{{sgId}}"
+      ]
+    }
+  ],
+  "volumes": [],
+  "password": "UEBzc3cwcmQ="
+}
+
+@testServerId={{ServerCreate.response.body.$.id}}
+
+
+### List Server
+# @name ServerList
+GET {{BASE_URL}}/servers HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+
+### Get Specific Server
+# @name ServerGet
+GET {{BASE_URL}}/servers/{{testServerId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+
+### Update Server
+# @name ServerUpdate
+PUT {{BASE_URL}}/servers/{{testServerId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+  "name": "new-server",
+  "description": "new server description"
+}
+
+
+### Delete Server
+# @name ServerDelete
+DELETE {{BASE_URL}}/servers/{{testServerId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+######## NIC Sub-Resource API ###########
+
+### List Server NICs
+# @name ServerNICList
+GET {{BASE_URL}}/servers/{{testServerId}}/nics HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+@nicId={{ServerNICList.response.body.$.nics[0].id}}
+
+
+### Associate Floating IP to NIC
+# @name ServerNICAssociateFIP
+POST {{BASE_URL}}/servers/{{testServerId}}/nics/{{nicId}}/floatingip HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+    "fip_id": "{{fipId}}"
+}
+
+
+######## Volume Sub-Resource API ###########
+
+### List Server Volume
+# @name ServerVolumeList
+GET {{BASE_URL}}/servers/{{testServerId}}/volumes HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+@serverVolId={{ServerVolumeList.response.body.$.disks[0].volume_id}}
+
+### Attach a Volume to Server
+# @name ServerVolumeAttach
+POST {{BASE_URL}}/servers/{{testServerId}}/volumes/{{volId}}
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
+
+### Detach a volume from a server
+# @name ServerVolumeDetach
+DELETE {{BASE_URL}}/servers/{{testServerId}}/volumes/{{volId}}
+content-type: application/json
+Authorization: Bearer {{TOKEN}}
