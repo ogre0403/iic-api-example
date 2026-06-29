@@ -1,0 +1,18 @@
+[
+  {
+    "file": "iam.yaml",
+    "label": "IAM"
+  },
+  {
+    "file": "mcc.yaml",
+    "label": "MCC"
+  },
+  {
+    "file": "vps.yaml",
+    "label": "VPS"
+  },
+  {
+    "file": "vrm.yaml",
+    "label": "VRM"
+  }
+]
