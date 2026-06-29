@@ -13,6 +13,29 @@
     <span class="topbar-title">IIC API Docs</span>
     <!-- Tab buttons are generated at runtime by app.js (from the spec list),
          so adding/removing a swagger/*.yaml never requires editing this file. -->
+
+    <!-- Right-side credential inputs: values are persisted to localStorage and
+         automatically injected into Stoplight Try It fields on every render. -->
+    <div class="cred-group" id="cred-group">
+      <label class="cred-label" for="cred-token">Token</label>
+      <input
+        class="cred-input"
+        id="cred-token"
+        type="password"
+        placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWlkIiwiaWF0IjoxNjAwMDAwMDAwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <label class="cred-label" for="cred-project-id">Project ID</label>
+      <input
+        class="cred-input"
+        id="cred-project-id"
+        type="text"
+        placeholder="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
   </nav>
 
   <div class="viewer">

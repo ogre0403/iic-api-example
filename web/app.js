@@ -1,4 +1,142 @@
 // ---------------------------------------------------------------------------
+// Credentials: token & project-id stored in localStorage, auto-injected into
+// Stoplight Elements Try It fields on every render / spec switch.
+// ---------------------------------------------------------------------------
+const CRED_KEYS = { token: 'iic_cred_token', projectId: 'iic_cred_project_id' };
+
+const credentials = {
+  token:     localStorage.getItem(CRED_KEYS.token)     || '',
+  projectId: localStorage.getItem(CRED_KEYS.projectId) || '',
+};
+
+// Save a single credential key and update the in-memory object.
+function saveCred(key, value) {
+  credentials[key] = value;
+  localStorage.setItem(CRED_KEYS[key], value);
+}
+
+// Dispatch a native value-change so React (inside Stoplight Elements) picks it up.
+function setNativeInputValue(input, value) {
+  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype, 'value'
+  );
+  if (nativeInputValueSetter && nativeInputValueSetter.set) {
+    nativeInputValueSetter.set.call(input, value);
+  } else {
+    input.value = value;
+  }
+  input.dispatchEvent(new Event('input',  { bubbles: true }));
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+// Also handle <textarea> (Stoplight sometimes uses one for security values).
+function setNativeTextareaValue(ta, value) {
+  const nativeSetter = Object.getOwnPropertyDescriptor(
+    window.HTMLTextAreaElement.prototype, 'value'
+  );
+  if (nativeSetter && nativeSetter.set) {
+    nativeSetter.set.call(ta, value);
+  } else {
+    ta.value = value;
+  }
+  ta.dispatchEvent(new Event('input',  { bubbles: true }));
+  ta.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+// Deep-walk el (including shadow roots) and collect all matching inputs/textareas.
+function deepQueryAll(el, selector) {
+  const results = [];
+  function walk(node) {
+    if (!node) return;
+    if (node.querySelectorAll) {
+      node.querySelectorAll(selector).forEach((n) => results.push(n));
+    }
+    if (node.shadowRoot) walk(node.shadowRoot);
+    for (const c of (node.children || [])) walk(c);
+  }
+  walk(el);
+  return results;
+}
+
+// Find an input/textarea whose visible label (aria-label, placeholder, or the
+// preceding <label> text) contains the given keyword (case-insensitive).
+function findInputsByLabel(root, keyword) {
+  const kw = keyword.toLowerCase();
+  const candidates = deepQueryAll(root, 'input, textarea');
+  return candidates.filter((el) => {
+    const ariaLabel  = (el.getAttribute('aria-label')  || '').toLowerCase();
+    const placeholder = (el.getAttribute('placeholder') || '').toLowerCase();
+    const name        = (el.getAttribute('name')        || '').toLowerCase();
+    const id          = (el.id                          || '').toLowerCase();
+    // Also check associated <label> text.
+    let labelText = '';
+    if (el.id) {
+      // Walk up through shadow roots to find a <label for="...">
+      function findLabel(searchRoot, targetId) {
+        if (!searchRoot) return null;
+        const lbl = searchRoot.querySelector ? searchRoot.querySelector('label[for="' + targetId + '"]') : null;
+        if (lbl) return lbl;
+        if (searchRoot.shadowRoot) return findLabel(searchRoot.shadowRoot, targetId);
+        return null;
+      }
+      const lbl = findLabel(root, el.id);
+      if (lbl) labelText = lbl.textContent.toLowerCase();
+    }
+    // Stoplight renders the field label as a sibling <label> or a nearby div/span.
+    // Fall back to scanning the parent container text.
+    let parentText = '';
+    const container = el.closest ? el.closest('div, li, section') : null;
+    if (container) parentText = container.textContent.toLowerCase();
+
+    return ariaLabel.includes(kw)
+      || placeholder.includes(kw)
+      || name.includes(kw)
+      || id.includes(kw)
+      || labelText.includes(kw)
+      || parentText.includes(kw);
+  });
+}
+
+// Apply stored credentials into all visible Try It inputs.
+function applyCredentialsToTryIt() {
+  const root = document.getElementById('api-viewer');
+  if (!root) return;
+
+  // --- Bearer token ---
+  // Stoplight renders a "token" input (type=password or text) for bearerAuth.
+  // It may appear with labels like "token", "bearerAuth", "Authorization", etc.
+  if (credentials.token) {
+    const tokenInputs = findInputsByLabel(root, 'token');
+    tokenInputs.forEach((inp) => {
+      // Avoid overwriting if user has already typed something different.
+      if (inp.value === credentials.token) return;
+      if (inp instanceof HTMLTextAreaElement) {
+        setNativeTextareaValue(inp, credentials.token);
+      } else {
+        setNativeInputValue(inp, credentials.token);
+      }
+    });
+  }
+
+  // --- project-id ---
+  // project-id may appear as a path param, query param or header.
+  // We fill any input whose identifier contains "project" (but NOT the topbar
+  // input itself, which has id="cred-project-id" and is outside the viewer).
+  if (credentials.projectId) {
+    const projInputs = findInputsByLabel(root, 'project');
+    projInputs.forEach((inp) => {
+      if (inp.id === 'cred-project-id') return; // skip our own topbar input
+      if (inp.value === credentials.projectId) return;
+      if (inp instanceof HTMLTextAreaElement) {
+        setNativeTextareaValue(inp, credentials.projectId);
+      } else {
+        setNativeInputValue(inp, credentials.projectId);
+      }
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Spec list (single source of truth for the top-bar tabs)
 // ---------------------------------------------------------------------------
 // Each entry: { file: '<name>.yaml', label: '<TAB TEXT>' }.
@@ -50,13 +188,19 @@ function buildTabs() {
   if (!bar) return;
   // Remove any pre-existing tab buttons (none in the new index.html, but be safe).
   bar.querySelectorAll('.tab-btn').forEach((b) => b.remove());
+  // Insert tabs before the cred-group so they sit right after the title.
+  const credGroup = bar.querySelector('#cred-group');
   SPECS.forEach((spec, i) => {
     const btn = document.createElement('button');
     btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
     btn.textContent = spec.label || spec.file;
     btn.dataset.file = spec.file;
     btn.addEventListener('click', () => switchApi(spec.file, btn));
-    bar.appendChild(btn);
+    if (credGroup) {
+      bar.insertBefore(btn, credGroup);
+    } else {
+      bar.appendChild(btn);
+    }
   });
 }
 
@@ -282,6 +426,8 @@ function observeViewer() {
   observer.observe(root, { childList: true, subtree: true });
   applyGrouping();
   expandGroupForHash();
+  // Apply saved credentials whenever the viewer re-renders.
+  applyCredentialsToTryIt();
 }
 
 function switchApi(file, el, restoreHash) {
@@ -452,6 +598,9 @@ function persistHash() {
     const currentTab = localStorage.getItem('iic_active_tab') || DEFAULT_SPEC_FILE;
     localStorage.setItem('iic_hash_' + currentTab, h);
     setTimeout(fixRightColScroll, 400);
+    // Re-apply credentials whenever navigation lands on a new operation page.
+    setTimeout(applyCredentialsToTryIt, 800);
+    setTimeout(applyCredentialsToTryIt, 1500);
   }
 }
 
@@ -463,6 +612,31 @@ setInterval(persistHash, 300);
 
 // Initial wiring once the page is ready.
 window.addEventListener('load', async () => {
+  // --- Wire up credential inputs in the topbar (must happen before any early return) ---
+  (function initCredentialInputs() {
+    const tokenInput     = document.getElementById('cred-token');
+    const projectIdInput = document.getElementById('cred-project-id');
+
+    if (tokenInput) {
+      // Restore persisted value into the topbar input.
+      tokenInput.value = credentials.token;
+      // Show token as plain text while focused.
+      tokenInput.addEventListener('focus', () => { tokenInput.type = 'text'; });
+      tokenInput.addEventListener('blur',  () => { tokenInput.type = 'password'; });
+      tokenInput.addEventListener('input', () => {
+        saveCred('token', tokenInput.value.trim());
+        applyCredentialsToTryIt();
+      });
+    }
+
+    if (projectIdInput) {
+      projectIdInput.value = credentials.projectId;
+      projectIdInput.addEventListener('input', () => {
+        saveCred('projectId', projectIdInput.value.trim());
+        applyCredentialsToTryIt();
+      });
+    }
+  })();
   // Resolve the spec list (injected list, specs.json, or fallback) first,
   // then build the tab bar from it.
   await resolveSpecs();

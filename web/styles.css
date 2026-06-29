@@ -259,3 +259,57 @@ elements-api .sl-elements-api .HttpOperation > div:first-child .sl-truncate {
   white-space: normal !important;
   word-break: break-all !important;
 }
+
+/* ---- Right-side credential inputs in the topbar ---- */
+
+/* Push the cred group to the far right; tabs are left-aligned naturally. */
+.cred-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.cred-label {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.cred-input {
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 12px;
+  height: 28px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+/* Token input: wider since tokens are long */
+#cred-token {
+  width: 180px;
+}
+
+/* Project-id input */
+#cred-project-id {
+  width: 140px;
+}
+
+.cred-input::placeholder {
+  color: #94a3b8;
+}
+
+.cred-input:focus {
+  border-color: #2563eb;
+}
+
+/* Show the token as plain text when the input is focused (password → text) */
+.cred-input[type="password"]:focus {
+  letter-spacing: 0;
+}
