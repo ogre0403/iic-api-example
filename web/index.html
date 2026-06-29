@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IIC API Documentation</title>
+  <script src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@stoplight/elements/styles.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="topbar">
+    <span class="topbar-title">IIC API Docs</span>
+    <button class="tab-btn active" onclick="switchApi('iam.yaml', this)">IAM</button>
+    <button class="tab-btn" onclick="switchApi('mcc.yaml', this)">MCC</button>
+    <button class="tab-btn" onclick="switchApi('vps.yaml', this)">VPS</button>
+    <button class="tab-btn" onclick="switchApi('vrm.yaml', this)">VRM</button>
+  </nav>
+
+  <div class="viewer">
+    <elements-api
+      id="api-viewer"
+      apiDescriptionUrl="iam.yaml"
+      router="hash"
+      layout="sidebar"
+      hideSchemas="true"
+      hideExport="true"
+    ></elements-api>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

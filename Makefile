@@ -12,7 +12,7 @@ swagger:
 		ls swagger/*.yaml 2>/dev/null | xargs -I{} basename {} .yaml | sed 's/^/  /'; \
 		exit 1; \
 	fi
-	docker run -ti --rm -p 8080:8080 -v `pwd`/swagger/$(SERVICE).yaml:/app/swagger.json swaggerapi/swagger-ui:v5.20.2
+	docker run -ti --rm -p 8088:8080 -v `pwd`/swagger/$(SERVICE).yaml:/app/swagger.json swaggerapi/swagger-ui:v5.20.2
 
 
 doc-up:

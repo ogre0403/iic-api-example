@@ -1,0 +1,4702 @@
+openapi: 3.0.0
+info:
+  contact: {}
+  description: ASUS Enterprise Virtual Registry Management 以 Portal 需求列出其需要的
+    Restful API Response 以 Json 格式呈現
+  title: Virtual Registry Management RESTful API
+  version: v0.1.11
+tags:
+  - name: User/Project
+  - name: User/Exports
+  - name: User/MemberAcl
+  - name: User/Repository
+  - name: User/Tag
+  - name: User/Snapshot
+  - name: User/Image
+  - name: User/ProjectAcl
+  - name: Admin/Export
+  - name: Admin/Image
+  - name: Admin/MemberAcl
+  - name: Admin/Project
+  - name: Admin/Snapshot
+  - name: Admin/ProjectAcl
+  - name: Admin/Repository
+  - name: Admin/Tag
+paths:
+  "/admin/export/{export-id}":
+    delete:
+      description: Delete an export record by its ID
+      parameters:
+        - description: Export ID
+          in: path
+          name: export-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.DeleteExportOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 刪除指定的匯出紀錄
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Export
+    get:
+      description: Retrieve export details by export ID
+      parameters:
+        - description: Export ID
+          in: path
+          name: export-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.GetExportOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得指定的匯出資訊
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Export
+  /admin/exports:
+    get:
+      description: Get a paginated list of exports with optional filtering
+      parameters:
+        - description: Number of items to return
+          in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+        - description: Number of items to skip
+          in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+        - description: Filter conditions
+          in: query
+          name: where
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.ListExportsOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 列出所有的匯出資訊
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Export
+  /admin/import:
+    post:
+      description: Creates a common tag from an existing OpenStack Glance image and
+        sets it as public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/admin.ImportImageInput"
+        description: Import image request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.ImportImageOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 匯入 Image (已存在於openstack)
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Image
+  "/admin/memberacl/{member-acl-id}":
+    delete:
+      description: Delete a specific member ACL by ID
+      parameters:
+        - description: Member ACL ID
+          in: path
+          name: member-acl-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 刪除指定的 member-acl
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/MemberAcl
+  "/admin/project/{project-id}":
+    get:
+      description: Get project usage statistics and limits information
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.GetProjectInfoOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得 project 資訊
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Project
+    put:
+      description: Update the soft limit count and size for a project
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/admin.UpdateProjectInput"
+        description: Update project request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.UpdateProjectOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 更新指定的 project
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Project
+  "/admin/project/{project-id}/server/{server-id}/snapshot":
+    post:
+      description: Create a snapshot of a VPS server, either by creating a new
+        repository or using an existing one
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Server ID
+          in: path
+          name: server-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/admin.CreateSnapshotInput"
+        description: Snapshot creation parameters
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.CreateSnapshotOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 對 Server 建立 snapshot
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Snapshot
+  /admin/projectacl:
+    post:
+      description: Create a new project access control list entry for tag sharing and
+        project access management
+      requestBody:
+        $ref: "#/components/requestBodies/admin.CreateProjectAclInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.CreateProjectAclOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 在指定的 tag 創建 project-acl 分享給其他成員使用
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/ProjectAcl
+  "/admin/projectacl/{project-acl-id}":
+    delete:
+      description: Delete a specific project ACL by ID or remove project ACL from a tag
+      parameters:
+        - description: Project ACL ID (when deleting specific ACL)
+          in: path
+          name: project-acl-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 指定的 tag 停止分享給其他成員使用
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/ProjectAcl
+  /admin/projectacls:
+    get:
+      description: List project ACLs with pagination and filtering support
+      parameters:
+        - description: "Number of items to return (default: 100)"
+          in: query
+          name: limit
+          schema:
+            type: integer
+        - description: "Number of items to skip (default: 0)"
+          in: query
+          name: offset
+          schema:
+            type: integer
+        - description: Filter conditions
+          in: query
+          name: where
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - description: Filter by namespace
+          in: query
+          name: namespace
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.ListProjectAclsOutput"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得所有 project-acl
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/ProjectAcl
+  /admin/projects:
+    get:
+      description: List all projects with their usage statistics and limits
+      parameters:
+        - description: "Number of items to return (default: 100)"
+          in: query
+          name: limit
+          schema:
+            type: integer
+        - description: "Number of items to skip (default: 0)"
+          in: query
+          name: offset
+          schema:
+            type: integer
+        - description: Filter by namespace
+          in: query
+          name: namespace
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.ListProjectsOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得 project 資訊
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Project
+  /admin/repositories:
+    get:
+      description: Get a paginated list of repositories with optional filtering
+      parameters:
+        - description: Limit number of results
+          in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+        - description: Offset for pagination
+          in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+        - description: Filter conditions
+          in: query
+          name: where
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - description: Filter by namespace
+          in: query
+          name: namespace
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.ListRepositoriesOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 列出所有的 repositories
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Repository
+  /admin/repository:
+    post:
+      description: Create a new repository with administrative privileges
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/admin.CreateRepositoryInput"
+        description: Repository creation payload
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.CreateRepositoryOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 創建 repository
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Repository
+  "/admin/repository/{repository-id}":
+    delete:
+      description: Delete a specific repository and all its associated tags (if not
+        protected)
+      parameters:
+        - description: Repository ID
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 棄用指定的 repository
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Repository
+    get:
+      description: Get detailed information about a specific repository
+      parameters:
+        - description: Repository ID
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.GetRepositoryOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得指定的 repository
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Repository
+    put:
+      description: Update an existing repository with administrative privileges
+      parameters:
+        - description: Repository ID
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/admin.UpdateRepositoryInput"
+        description: Repository update payload
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.UpdateRepositoryOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 更新指定的 repository
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Repository
+  "/admin/repository/{repository-id}/protect":
+    delete:
+      description: Disable protection for a specific repository with administrative
+        privileges
+      parameters:
+        - description: Repository ID
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.UnsetRepositoryProtectOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 解除保護指定的 repository
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Repository
+    post:
+      description: Enable protection for a specific repository with administrative
+        privileges
+      parameters:
+        - description: Repository ID
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.SetRepositoryProtectOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 設定保護指定的 repository (避免被刪除)
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Repository
+  /admin/tag:
+    post:
+      description: Create a new tag with administrative privileges and simultaneously
+        create an empty Glance image
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/admin.CreateTagInput"
+        description: Tag creation payload
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.CreateTagOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 創建 tag
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Tag
+  "/admin/tag/{tag-id}":
+    delete:
+      description: Delete a specific tag (if not protected)
+      parameters:
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 棄用指定的 tag
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Tag
+    get:
+      description: Get detailed information about a specific tag
+      parameters:
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.GetTagOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得指定的 tag
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Tag
+    put:
+      description: Update an existing tag with administrative privileges
+      parameters:
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/admin.UpdateTagInput"
+        description: Tag update payload
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.UpdateTagOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 更新指定的 tag
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Tag
+  "/admin/tag/{tag-id}/download":
+    post:
+      description: Downloads a image based on the provided filepath and tag ID
+      parameters:
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/admin.DownloadImageInput"
+        description: Download image request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.DownloadImageOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 下載 Image
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Image
+  "/admin/tag/{tag-id}/memberacl":
+    post:
+      description: Create multiple member ACLs in batch for specified tags and users
+      parameters:
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/admin.CreateMemberAclBatchInput"
+        description: Member ACL batch creation payload
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.CreateMemberAclBatchOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden - User not belong to project or tag not belong to
+            repository
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 在 repository 創建 member-acl
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/MemberAcl
+  "/admin/tag/{tag-id}/memberacls":
+    get:
+      description: List member ACLs with pagination and filtering support
+      parameters:
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+        - description: "Number of items to return (default: 100)"
+          in: query
+          name: limit
+          schema:
+            type: integer
+        - description: "Number of items to skip (default: 0)"
+          in: query
+          name: offset
+          schema:
+            type: integer
+        - description: Filter conditions
+          in: query
+          name: where
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - description: Filter by namespace
+          in: query
+          name: namespace
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.ListMemberAclsOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得此 tag 的所有 member-acl
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/MemberAcl
+  "/admin/tag/{tag-id}/protect":
+    delete:
+      description: Unset a tag as protected to allow deletion
+      parameters:
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.UnsetTagProtectOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 解除保護指定的 tag
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Tag
+    post:
+      description: Set a tag as protected to prevent deletion
+      parameters:
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.SetTagProtectOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 設定保護指定的 tag (避免被刪除)
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Tag
+  "/admin/tag/{tag-id}/share":
+    delete:
+      description: Delete a specific project ACL by ID or remove project ACL from a tag
+      parameters:
+        - description: Tag ID (when deleting from tag share)
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 指定的 tag 停止分享給其他成員使用
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/ProjectAcl
+    post:
+      description: Create a new project access control list entry for tag sharing and
+        project access management
+      parameters:
+        - description: Tag ID (when used with /admin/tag/{tag-id}/share route)
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/admin.CreateProjectAclInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.CreateProjectAclOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 在指定的 tag 創建 project-acl 分享給其他成員使用
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/ProjectAcl
+  /admin/tags:
+    get:
+      description: Get a paginated list of tags with optional filtering by namespace
+        and where conditions
+      parameters:
+        - description: "Number of items to return (default: 100)"
+          in: query
+          name: limit
+          schema:
+            type: integer
+        - description: "Number of items to skip (default: 0)"
+          in: query
+          name: offset
+          schema:
+            type: integer
+        - description: Filter conditions
+          in: query
+          name: where
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - description: Filter by namespace
+          in: query
+          name: namespace
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.ListTagsOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得所有 tags
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Tag
+  /admin/upload:
+    post:
+      description: Creates a repository/tag if they don't exist and uploads image data
+        to the specified tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/admin.UploadImageInput"
+        description: Upload image request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/admin.UploadImageOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 上傳 Image
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin/Image
+  "/project/{project-id}":
+    get:
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/user.GetProjectInfoOutput"
+        "403":
+          description: Forbidden
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得 project 資訊
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Project
+  "/project/{project-id}/export/{export-id}":
+    delete:
+      description: Delete an export by ID. Only the creator, tenant owner, or tenant
+        admin can delete an export.
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Export ID
+          in: path
+          name: export-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Export deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.DeleteExportOutput"
+        "403":
+          description: Forbidden - Only creator, tenant owner, or tenant admin can delete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 刪除指定匯出紀錄
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Exports
+    get:
+      description: Retrieve export information by export ID
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Export ID
+          in: path
+          name: export-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.GetExportOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得指定匯出資訊
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Exports
+  "/project/{project-id}/exports":
+    get:
+      description: Get a list of exports with pagination and filtering
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Limit number of results, -1表示全部顯示
+          in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+        - description: Offset for pagination, 從第幾筆開始取得
+          in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+        - description: Filter conditions, 此功能可以帶入欄位及值作為查詢條件，來篩選出滿足條件的清單
+          in: query
+          name: where
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: Successfully retrieved exports list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.ListExportsOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 列出所有的匯出資訊
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Exports
+  "/project/{project-id}/memberacl/{member-acl-id}":
+    delete:
+      description: Delete a member ACL by ID. Only TENANT_OWNER, TENANT_ADMIN, or the
+        creator can delete the ACL.
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Member ACL ID
+          in: path
+          name: member-acl-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.DeleteMemberAclOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 刪除指定的 member-acl
+      security:
+        - bearerAuth: []
+      tags:
+        - User/MemberAcl
+  "/project/{project-id}/repositories":
+    get:
+      description: Get a list of repositories with pagination and filtering
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: "Number of items to return, -1表示全部顯示 (default: 100)"
+          in: query
+          name: limit
+          schema:
+            type: integer
+        - description: "Number of items to skip (default: 0)"
+          in: query
+          name: offset
+          schema:
+            type: integer
+        - description: Filter conditions, 此功能可以帶入欄位及值作為查詢條件，來篩選出滿足條件的清單
+          in: query
+          name: where
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: List of repositories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.ListRepositoriesOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 列出所有的 repositories
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Repository
+  "/project/{project-id}/repository":
+    post:
+      description: Create a new repository within a specific project
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user.CreateRepositoryInput"
+        description: Repository creation payload
+        required: true
+      responses:
+        "201":
+          description: Repository created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.CreateRepositoryOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 創建 repository
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Repository
+  "/project/{project-id}/repository/{repository-id}":
+    delete:
+      description: Delete a repository by ID. Only repository creators, tenant owners,
+        and tenant admins can delete repositories. Protected repositories cannot
+        be deleted.
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Repository ID
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Repository not found
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 棄用指定的 repository
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Repository
+    get:
+      description: Get repository details by project ID and repository ID
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Repository ID
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.GetRepositoryOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得指定的 repository
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Repository
+    put:
+      description: Update repository information including name and description
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Repository ID
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user.UpdateRepositoryInput"
+        description: Repository update data
+        required: true
+      responses:
+        "200":
+          description: Successfully updated repository
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.UpdateRepositoryOutput"
+        "400":
+          description: Bad request - malformed input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "401":
+          description: Unauthorized - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Repository not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 更新指定的 repository
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Repository
+  "/project/{project-id}/repository/{repository-id}/memberacl":
+    post:
+      description: Create multiple member ACLs in batch for repository or tag context
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Repository ID (for repository context)
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/user.CreateMemberAclBatchInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.CreateMemberAclBatchOutput"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: Create member ACL batch
+      security:
+        - bearerAuth: []
+      tags:
+        - User/MemberAcl
+  "/project/{project-id}/repository/{repository-id}/tag":
+    post:
+      description: Create a new tag with the specified name, type, disk format, and
+        container format
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Repository ID
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user.CreateTagInput"
+        description: Tag creation input
+        required: true
+      responses:
+        "201":
+          description: Successfully created tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.CreateTagOutput"
+        "400":
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 在 repository 創建 tag
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Tag
+  "/project/{project-id}/repository/{repository-id}/tags":
+    get:
+      description: Get a list of tags that the user has access to, with optional filtering
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Repository ID (only for repository-specific endpoint)
+          in: path
+          name: repository-id
+          required: true
+          schema:
+            type: string
+        - description: Limit number of results
+          in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+        - description: Offset for pagination
+          in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+        - description: Filter conditions
+          in: query
+          name: where
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - description: set false to disable admin ability if admin called and wanted
+          in: query
+          name: adminRole
+          schema:
+            type: boolean
+        - description: belong to the current user, default is true
+          in: query
+          name: creator
+          schema:
+            type: boolean
+        - description: share to current User, default is true
+          in: query
+          name: projectLimit
+          schema:
+            type: boolean
+        - description: public in project, default is true
+          in: query
+          name: projectPublic
+          schema:
+            type: boolean
+        - description: share to current project, default is true
+          in: query
+          name: globalLimit
+          schema:
+            type: boolean
+        - description: public in namespace, default is true
+          in: query
+          name: globalPublic
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.ListTagsOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得可使用的所有 tags
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Tag
+  "/project/{project-id}/server/{server-id}/snapshot":
+    post:
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Server ID
+          in: path
+          name: server-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/user.CreateSnapshotInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.CreateSnapshotOutput"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 對 Server 建立 snapshot
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Snapshot
+  "/project/{project-id}/tag/{tag-id}":
+    delete:
+      description: Delete a tag by ID. Only creator, tenant owner, or tenant admin can
+        delete tags. Protected tags cannot be deleted.
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.DeleteTagOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 棄用指定的 tag
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Tag
+    get:
+      description: Retrieve tag information by tag ID
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.GetTagOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得指定的 tag
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Tag
+    put:
+      description: Update an existing tag by ID. Only the tag creator, tenant owner,
+        or tenant admin can perform this operation.
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user.UpdateTagInput"
+        description: Tag update data
+        required: true
+      responses:
+        "200":
+          description: Successfully updated tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.UpdateTagOutput"
+        "400":
+          description: Bad request - malformed input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "401":
+          description: Unauthorized - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Tag not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 更新指定的 tag
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Tag
+  "/project/{project-id}/tag/{tag-id}/download":
+    post:
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user.DownloadImageInput"
+        description: body data
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 下載 Image
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Image
+  "/project/{project-id}/tag/{tag-id}/memberacl":
+    post:
+      description: Create multiple member ACLs in batch for repository or tag context
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Tag ID (for tag context)
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/user.CreateMemberAclBatchInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.CreateMemberAclBatchOutput"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: Create member ACL batch
+      security:
+        - bearerAuth: []
+      tags:
+        - User/MemberAcl
+  "/project/{project-id}/tag/{tag-id}/memberacls":
+    get:
+      description: Get a paginated list of member ACLs with optional filtering
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+        - description: "Number of items to return (default: 100)"
+          in: query
+          name: limit
+          schema:
+            type: integer
+        - description: "Number of items to skip (default: 0)"
+          in: query
+          name: offset
+          schema:
+            type: integer
+        - description: Filter conditions, 支援的欄位：user-id
+          in: query
+          name: where
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.ListMemberAclsOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得此 tag 的所有 member-acl
+      security:
+        - bearerAuth: []
+      tags:
+        - User/MemberAcl
+  "/project/{project-id}/tag/{tag-id}/properties":
+    get:
+      description: Get hardware properties (hw_machine_type, hw_firmware_type,
+        hw_disk_bus) for a specific tag
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.ListPropertiesOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得指定 tag 的屬性
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Tag
+    put:
+      description: >-
+        Update hardware properties (hw_machine_type, hw_firmware_type,
+        hw_disk_bus) for a specific tag. Only the tag creator, tenant owner, or
+        tenant admin can perform this operation.
+
+        <table class="basic-table">
+
+        <thead>
+
+        <tr>
+
+        <th>hw_machine_type</th>
+
+        <th>hw_firmware_type</th>
+
+        <th>hw_disk_bus</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr>
+
+        <td>q35</td>
+
+        <td>uefi</td>
+
+        <td>one of virtio, sata, scsi, usb.</td>
+
+        </tr>
+
+        <tr>
+
+        <td>q35</td>
+
+        <td>bios</td>
+
+        <td>one of virtio, sata, scsi, usb.</td>
+
+        </tr>
+
+        <tr>
+
+        <td>i440fx</td>
+
+        <td>bios</td>
+
+        <td>one of virtio, ide, usb.</td>
+
+        </tr>
+
+        </tbody>
+
+        </table>
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user.UpdateTagPropertiesInput"
+        description: Tag properties update data
+        required: true
+      responses:
+        "200":
+          description: Successfully updated tag properties
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.UpdateTagPropertiesOutput"
+        "400":
+          description: Bad request - malformed input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "401":
+          description: Unauthorized - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Tag not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 更新指定 tag 的屬性
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Tag
+  "/project/{project-id}/tag/{tag-id}/share":
+    delete:
+      description: Delete project access control list entry for a specific tag and project
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.DeleteProjectAclOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 指定的 tag 停止分享給其他成員使用
+      security:
+        - bearerAuth: []
+      tags:
+        - User/ProjectAcl
+    post:
+      description: Create a new project ACL for the specified tag and project
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Tag ID
+          in: path
+          name: tag-id
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.CreateProjectAclOutput"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 在指定的 tag 創建 project-acl 分享給其他成員使用
+      security:
+        - bearerAuth: []
+      tags:
+        - User/ProjectAcl
+  "/project/{project-id}/tags":
+    get:
+      description: Get a list of tags that the user has access to, with optional filtering
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Limit number of results
+          in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+        - description: Offset for pagination
+          in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+        - description: Filter conditions
+          in: query
+          name: where
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - description: set false to disable admin ability if admin called and wanted
+          in: query
+          name: adminRole
+          schema:
+            type: boolean
+        - description: belong to the current user, default is true
+          in: query
+          name: creator
+          schema:
+            type: boolean
+        - description: share to current User, default is true
+          in: query
+          name: projectLimit
+          schema:
+            type: boolean
+        - description: public in project, default is true
+          in: query
+          name: projectPublic
+          schema:
+            type: boolean
+        - description: share to current project, default is true
+          in: query
+          name: globalLimit
+          schema:
+            type: boolean
+        - description: public in namespace, default is true
+          in: query
+          name: globalPublic
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.ListTagsOutput"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 取得可使用的所有 tags
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Tag
+  "/project/{project-id}/upload":
+    post:
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user.UploadImageInput"
+        description: body data
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.UploadImageOutput"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 上傳 Image
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Image
+  "/project/{project-id}/volumes/{volume-id}/snapshot":
+    post:
+      parameters:
+        - description: Project ID
+          in: path
+          name: project-id
+          required: true
+          schema:
+            type: string
+        - description: Volume ID
+          in: path
+          name: volume-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/user.CreateSnapshotInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user.CreateSnapshotOutput"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
+      summary: 對 Volume 建立 snapshot
+      security:
+        - bearerAuth: []
+      tags:
+        - User/Snapshot
+servers:
+  - url: https://api.ai-cloud.iic.nchc.org.tw/vrm/api/v1
+    description: AI-Cloud
+  - url: https://api.ai-trust.iic.nchc.org.tw/vrm/api/v1
+    description: AI-Trust    
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  requestBodies:
+    user.CreateMemberAclBatchInput:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/user.CreateMemberAclBatchInput"
+      description: Create member ACL batch request
+      required: true
+    admin.CreateProjectAclInput:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/admin.CreateProjectAclInput"
+      description: Project ACL creation payload
+      required: true
+    user.CreateSnapshotInput:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/user.CreateSnapshotInput"
+      description: body data
+      required: true
+  schemas:
+    VirtualRegistryManagement_utility.ErrResponse:
+      properties:
+        errorCode:
+          type: integer
+        message:
+          type: string
+        meta:
+          additionalProperties: true
+          type: object
+      type: object
+    admin.CreateMemberAclBatchInput:
+      properties:
+        tagID:
+          items:
+            type: string
+          type: array
+        userID:
+          items:
+            type: string
+          type: array
+      required:
+        - tagID
+        - userID
+      type: object
+    admin.CreateMemberAclBatchOutput:
+      properties:
+        memberAcls:
+          items:
+            $ref: "#/components/schemas/admin.MemberAcl"
+          type: array
+      type: object
+    admin.CreateProjectAclInput:
+      properties:
+        projectId:
+          type: string
+        tagId:
+          type: string
+      required:
+        - tagId
+      type: object
+    admin.CreateProjectAclOutput:
+      properties:
+        projectAcl:
+          $ref: "#/components/schemas/admin.ProjectAcl"
+      type: object
+    admin.CreateRepositoryInput:
+      properties:
+        creator:
+          type: string
+        description:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          enum:
+            - linux
+            - windows
+            - none
+          type: string
+        projectId:
+          type: string
+      required:
+        - creator
+        - name
+        - namespace
+        - operatingSystem
+        - projectId
+      type: object
+    admin.CreateRepositoryOutput:
+      properties:
+        count:
+          type: integer
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/admin.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/admin.projectInfo"
+        protect:
+          type: boolean
+        tags:
+          description: for ui/ux create filter
+          items:
+            $ref: "#/components/schemas/admin.tagInfo"
+          type: array
+        updatedAt:
+          type: string
+      type: object
+    admin.CreateSnapshotInput:
+      properties:
+        creator:
+          type: string
+        description:
+          type: string
+        extra:
+          items:
+            type: integer
+          type: array
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          enum:
+            - linux
+            - windows
+            - none
+          type: string
+        repositoryId:
+          type: string
+        version:
+          type: string
+      required:
+        - namespace
+        - version
+      type: object
+    admin.CreateSnapshotOutput:
+      properties:
+        repository:
+          $ref: "#/components/schemas/admin.repositoryInfo"
+        tag:
+          $ref: "#/components/schemas/admin.tagInfo"
+      type: object
+    admin.CreateTagInput:
+      properties:
+        containerFormat:
+          enum:
+            - bare
+          type: string
+        diskFormat:
+          enum:
+            - raw
+            - qcow2
+          type: string
+        extra:
+          items:
+            type: integer
+          type: array
+        name:
+          type: string
+        repositoryId:
+          type: string
+        type:
+          enum:
+            - common
+            - data
+          type: string
+      required:
+        - containerFormat
+        - diskFormat
+        - name
+        - repositoryId
+        - type
+      type: object
+    admin.CreateTagOutput:
+      properties:
+        createdAt:
+          type: string
+        extra:
+          additionalProperties: true
+          type: object
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        protect:
+          type: boolean
+        referenceTarget:
+          type: string
+        repository:
+          $ref: "#/components/schemas/admin.repositoryInfo"
+        size:
+          type: integer
+        status:
+          description: deprecated
+          type: string
+        tagStatus:
+          enum:
+            - queued
+            - preparing
+            - active
+            - deactive
+            - error
+            - importing
+          type: string
+        type:
+          enum:
+            - common
+            - increase
+            - data
+            - data_increase
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    admin.DeleteExportOutput:
+      type: object
+    admin.DownloadImageInput:
+      properties:
+        filepath:
+          type: string
+      required:
+        - filepath
+      type: object
+    admin.DownloadImageOutput:
+      type: object
+    admin.Export:
+      properties:
+        createdAt:
+          type: string
+        creator:
+          type: string
+        filepath:
+          type: string
+        id:
+          type: string
+        imageId:
+          type: string
+        imageStatus:
+          type: string
+        namespace:
+          type: string
+        projectId:
+          type: string
+        repositoryId:
+          type: string
+        repositoryName:
+          type: string
+        snapshotId:
+          type: string
+        snapshotStatus:
+          type: string
+        status:
+          type: string
+        tagId:
+          type: string
+        tagName:
+          type: string
+        type:
+          type: string
+        updatedAt:
+          type: string
+        volumeId:
+          type: string
+        volumeStatus:
+          type: string
+      type: object
+    admin.GetExportOutput:
+      properties:
+        createdAt:
+          type: string
+        creator:
+          type: string
+        filepath:
+          type: string
+        id:
+          type: string
+        imageId:
+          type: string
+        imageStatus:
+          type: string
+        namespace:
+          type: string
+        projectId:
+          type: string
+        repositoryId:
+          type: string
+        repositoryName:
+          type: string
+        snapshotId:
+          type: string
+        snapshotStatus:
+          type: string
+        status:
+          type: string
+        tagId:
+          type: string
+        tagName:
+          type: string
+        type:
+          type: string
+        updatedAt:
+          type: string
+        volumeId:
+          type: string
+        volumeStatus:
+          type: string
+      type: object
+    admin.GetProjectInfoOutput:
+      properties:
+        softLimitCount:
+          type: integer
+        softLimitSize:
+          type: integer
+        usedCount:
+          type: integer
+        usedSize:
+          type: integer
+      type: object
+    admin.GetRepositoryOutput:
+      properties:
+        count:
+          type: integer
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/admin.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/admin.projectInfo"
+        protect:
+          type: boolean
+        tags:
+          description: for ui/ux create filter
+          items:
+            $ref: "#/components/schemas/admin.tagInfo"
+          type: array
+        updatedAt:
+          type: string
+      type: object
+    admin.GetTagOutput:
+      properties:
+        createdAt:
+          type: string
+        extra:
+          additionalProperties: true
+          type: object
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        protect:
+          type: boolean
+        referenceTarget:
+          type: string
+        repository:
+          $ref: "#/components/schemas/admin.repositoryInfo"
+        size:
+          type: integer
+        status:
+          description: deprecated
+          type: string
+        tagStatus:
+          enum:
+            - queued
+            - preparing
+            - active
+            - deactive
+            - error
+            - importing
+          type: string
+        type:
+          enum:
+            - common
+            - increase
+            - data
+            - data_increase
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    admin.ImportImageInput:
+      properties:
+        creator:
+          type: string
+        description:
+          type: string
+        imageId:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          enum:
+            - linux
+            - windows
+            - none
+          type: string
+        projectId:
+          type: string
+        repositoryId:
+          type: string
+        version:
+          type: string
+      required:
+        - imageId
+        - namespace
+        - version
+      type: object
+    admin.ImportImageOutput:
+      properties:
+        repository:
+          $ref: "#/components/schemas/admin.repositoryInfo"
+        tag:
+          $ref: "#/components/schemas/admin.tagInfo"
+      type: object
+    admin.ListExportsOutput:
+      properties:
+        exports:
+          items:
+            $ref: "#/components/schemas/admin.Export"
+          type: array
+        total:
+          type: integer
+      type: object
+    admin.ListMemberAclsOutput:
+      properties:
+        memberAcls:
+          items:
+            $ref: "#/components/schemas/admin.MemberAcl"
+          type: array
+        total:
+          type: integer
+      type: object
+    admin.ListProjectAclsOutput:
+      properties:
+        projectAcls:
+          items:
+            $ref: "#/components/schemas/admin.ProjectAcl"
+          type: array
+        total:
+          type: integer
+      type: object
+    admin.ListProjectsOutput:
+      properties:
+        projects:
+          items:
+            $ref: "#/components/schemas/admin.ProjectInfo"
+          type: array
+        total:
+          type: integer
+      type: object
+    admin.ListRepositoriesOutput:
+      properties:
+        repositories:
+          items:
+            $ref: "#/components/schemas/admin.Repository"
+          type: array
+        total:
+          type: integer
+      type: object
+    admin.ListTagsOutput:
+      properties:
+        tags:
+          items:
+            $ref: "#/components/schemas/admin.Tag"
+          type: array
+        total:
+          type: integer
+      type: object
+    admin.MemberAcl:
+      properties:
+        id:
+          type: string
+        tag:
+          $ref: "#/components/schemas/admin.tagInfo"
+        user:
+          $ref: "#/components/schemas/admin.userInfo"
+      type: object
+    admin.ProjectAcl:
+      properties:
+        id:
+          type: string
+        project:
+          $ref: "#/components/schemas/admin.projectInfo"
+        tag:
+          $ref: "#/components/schemas/admin.tagInfo"
+      type: object
+    admin.ProjectInfo:
+      properties:
+        id:
+          type: string
+        softLimitCount:
+          type: integer
+        softLimitSize:
+          type: integer
+        usedCount:
+          type: integer
+        usedSize:
+          type: integer
+      type: object
+    admin.Repository:
+      properties:
+        count:
+          type: integer
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/admin.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/admin.projectInfo"
+        protect:
+          type: boolean
+        tags:
+          description: for ui/ux create filter
+          items:
+            $ref: "#/components/schemas/admin.tagInfo"
+          type: array
+        updatedAt:
+          type: string
+      type: object
+    admin.SetRepositoryProtectOutput:
+      properties:
+        count:
+          type: integer
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/admin.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/admin.projectInfo"
+        protect:
+          type: boolean
+        tags:
+          description: for ui/ux create filter
+          items:
+            $ref: "#/components/schemas/admin.tagInfo"
+          type: array
+        updatedAt:
+          type: string
+      type: object
+    admin.SetTagProtectOutput:
+      properties:
+        createdAt:
+          type: string
+        extra:
+          additionalProperties: true
+          type: object
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        protect:
+          type: boolean
+        referenceTarget:
+          type: string
+        repository:
+          $ref: "#/components/schemas/admin.repositoryInfo"
+        size:
+          type: integer
+        status:
+          description: deprecated
+          type: string
+        tagStatus:
+          enum:
+            - queued
+            - preparing
+            - active
+            - deactive
+            - error
+            - importing
+          type: string
+        type:
+          enum:
+            - common
+            - increase
+            - data
+            - data_increase
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    admin.Tag:
+      properties:
+        createdAt:
+          type: string
+        extra:
+          additionalProperties: true
+          type: object
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        protect:
+          type: boolean
+        referenceTarget:
+          type: string
+        repository:
+          $ref: "#/components/schemas/admin.repositoryInfo"
+        size:
+          type: integer
+        status:
+          description: deprecated
+          type: string
+        tagStatus:
+          enum:
+            - queued
+            - preparing
+            - active
+            - deactive
+            - error
+            - importing
+          type: string
+        type:
+          enum:
+            - common
+            - increase
+            - data
+            - data_increase
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    admin.UnsetRepositoryProtectOutput:
+      properties:
+        count:
+          type: integer
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/admin.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/admin.projectInfo"
+        protect:
+          type: boolean
+        tags:
+          description: for ui/ux create filter
+          items:
+            $ref: "#/components/schemas/admin.tagInfo"
+          type: array
+        updatedAt:
+          type: string
+      type: object
+    admin.UnsetTagProtectOutput:
+      properties:
+        createdAt:
+          type: string
+        extra:
+          additionalProperties: true
+          type: object
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        protect:
+          type: boolean
+        referenceTarget:
+          type: string
+        repository:
+          $ref: "#/components/schemas/admin.repositoryInfo"
+        size:
+          type: integer
+        status:
+          description: deprecated
+          type: string
+        tagStatus:
+          enum:
+            - queued
+            - preparing
+            - active
+            - deactive
+            - error
+            - importing
+          type: string
+        type:
+          enum:
+            - common
+            - increase
+            - data
+            - data_increase
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    admin.UpdateProjectInput:
+      properties:
+        softLimitCount:
+          type: integer
+        softLimitSize:
+          type: integer
+      type: object
+    admin.UpdateProjectOutput:
+      properties:
+        id:
+          type: string
+        softLimitCount:
+          type: integer
+        softLimitSize:
+          type: integer
+      type: object
+    admin.UpdateRepositoryInput:
+      properties:
+        description:
+          type: string
+        name:
+          type: string
+      type: object
+    admin.UpdateRepositoryOutput:
+      properties:
+        count:
+          type: integer
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/admin.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/admin.projectInfo"
+        protect:
+          type: boolean
+        tags:
+          description: for ui/ux create filter
+          items:
+            $ref: "#/components/schemas/admin.tagInfo"
+          type: array
+        updatedAt:
+          type: string
+      type: object
+    admin.UpdateTagInput:
+      properties:
+        extra:
+          additionalProperties: {}
+          type: object
+        name:
+          type: string
+      type: object
+    admin.UpdateTagOutput:
+      properties:
+        createdAt:
+          type: string
+        extra:
+          additionalProperties: true
+          type: object
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        protect:
+          type: boolean
+        referenceTarget:
+          type: string
+        repository:
+          $ref: "#/components/schemas/admin.repositoryInfo"
+        size:
+          type: integer
+        status:
+          description: deprecated
+          type: string
+        tagStatus:
+          enum:
+            - queued
+            - preparing
+            - active
+            - deactive
+            - error
+            - importing
+          type: string
+        type:
+          enum:
+            - common
+            - increase
+            - data
+            - data_increase
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    admin.UploadImageInput:
+      properties:
+        containerFormat:
+          enum:
+            - bare
+          type: string
+        creator:
+          type: string
+        description:
+          type: string
+        diskFormat:
+          enum:
+            - raw
+            - qcow2
+          type: string
+        extra:
+          additionalProperties: {}
+          type: object
+        filepath:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          enum:
+            - ""
+            - linux
+            - windows
+          type: string
+        projectId:
+          type: string
+        repositoryId:
+          type: string
+        tagId:
+          type: string
+        tagType:
+          enum:
+            - common
+            - data
+          type: string
+        version:
+          type: string
+      required:
+        - filepath
+        - namespace
+      type: object
+    admin.UploadImageOutput:
+      properties:
+        repository:
+          $ref: "#/components/schemas/admin.repositoryInfo"
+        tag:
+          $ref: "#/components/schemas/admin.tagInfo"
+      type: object
+    admin.projectInfo:
+      properties:
+        displayName:
+          type: string
+        id:
+          type: string
+      type: object
+    admin.repositoryInfo:
+      properties:
+        creator:
+          $ref: "#/components/schemas/admin.userInfo"
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/admin.projectInfo"
+      type: object
+    admin.tagInfo:
+      properties:
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+      type: object
+    admin.userInfo:
+      properties:
+        account:
+          type: string
+        displayName:
+          type: string
+        id:
+          type: string
+      type: object
+    user.CreateMemberAclBatchInput:
+      properties:
+        tagID:
+          items:
+            type: string
+          type: array
+        userID:
+          items:
+            type: string
+          type: array
+      required:
+        - tagID
+        - userID
+      type: object
+    user.CreateMemberAclBatchOutput:
+      properties:
+        memberAcls:
+          items:
+            $ref: "#/components/schemas/user.MemberAcl"
+          type: array
+      type: object
+    user.CreateProjectAclOutput:
+      properties:
+        projectAcl:
+          $ref: "#/components/schemas/user.ProjectAcl"
+      type: object
+    user.CreateRepositoryInput:
+      properties:
+        description:
+          type: string
+        name:
+          type: string
+        operatingSystem:
+          enum:
+            - linux
+            - windows
+            - none
+          type: string
+      required:
+        - name
+        - operatingSystem
+      type: object
+    user.CreateRepositoryOutput:
+      properties:
+        count:
+          type: integer
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/user.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/user.projectInfo"
+        tags:
+          description: for ui/ux create filter
+          items:
+            $ref: "#/components/schemas/user.tagInfo"
+          type: array
+        updatedAt:
+          type: string
+      type: object
+    user.CreateSnapshotInput:
+      properties:
+        description:
+          type: string
+        extra:
+          items:
+            type: integer
+          type: array
+        name:
+          type: string
+        operatingSystem:
+          enum:
+            - linux
+            - windows
+            - none
+          type: string
+        repositoryId:
+          type: string
+        version:
+          type: string
+      required:
+        - version
+      type: object
+    user.CreateSnapshotOutput:
+      properties:
+        repository:
+          $ref: "#/components/schemas/user.repositoryInfo"
+        tag:
+          $ref: "#/components/schemas/user.tagInfo"
+      type: object
+    user.CreateTagInput:
+      properties:
+        containerFormat:
+          enum:
+            - bare
+          type: string
+        diskFormat:
+          enum:
+            - raw
+            - qcow2
+          type: string
+        extra:
+          items:
+            type: integer
+          type: array
+        name:
+          type: string
+        type:
+          enum:
+            - common
+            - data
+          type: string
+      required:
+        - containerFormat
+        - diskFormat
+        - name
+        - type
+      type: object
+    user.CreateTagOutput:
+      properties:
+        createdAt:
+          type: string
+        extra:
+          additionalProperties: true
+          type: object
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        referenceTarget:
+          type: string
+        repository:
+          $ref: "#/components/schemas/user.repositoryInfo"
+        size:
+          type: integer
+        status:
+          description: deprecated
+          type: string
+        tagStatus:
+          enum:
+            - queued
+            - preparing
+            - active
+            - deactive
+            - error
+            - importing
+          type: string
+        type:
+          enum:
+            - common
+            - increase
+            - data
+            - data_increase
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    user.DeleteExportOutput:
+      type: object
+    user.DeleteMemberAclOutput:
+      type: object
+    user.DeleteProjectAclOutput:
+      type: object
+    user.DeleteTagOutput:
+      type: object
+    user.DownloadImageInput:
+      properties:
+        filepath:
+          type: string
+      required:
+        - filepath
+      type: object
+    user.Export:
+      properties:
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/user.userInfo"
+        filepath:
+          type: string
+        id:
+          type: string
+        projectId:
+          type: string
+        reason:
+          type: string
+        repositoryId:
+          type: string
+        repositoryName:
+          type: string
+        status:
+          type: string
+        tagId:
+          type: string
+        tagName:
+          type: string
+        type:
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    user.GetExportOutput:
+      properties:
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/user.userInfo"
+        filepath:
+          type: string
+        id:
+          type: string
+        projectId:
+          type: string
+        reason:
+          type: string
+        repositoryId:
+          type: string
+        repositoryName:
+          type: string
+        status:
+          type: string
+        tagId:
+          type: string
+        tagName:
+          type: string
+        type:
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    user.GetProjectInfoOutput:
+      properties:
+        softLimitCount:
+          type: integer
+        softLimitSize:
+          type: integer
+        usedCount:
+          type: integer
+        usedSize:
+          type: integer
+      type: object
+    user.GetRepositoryOutput:
+      properties:
+        count:
+          type: integer
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/user.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/user.projectInfo"
+        tags:
+          description: for ui/ux create filter
+          items:
+            $ref: "#/components/schemas/user.tagInfo"
+          type: array
+        updatedAt:
+          type: string
+      type: object
+    user.GetTagOutput:
+      properties:
+        createdAt:
+          type: string
+        extra:
+          additionalProperties: true
+          type: object
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        referenceTarget:
+          type: string
+        repository:
+          $ref: "#/components/schemas/user.repositoryInfo"
+        size:
+          type: integer
+        status:
+          description: deprecated
+          type: string
+        tagStatus:
+          enum:
+            - queued
+            - preparing
+            - active
+            - deactive
+            - error
+            - importing
+          type: string
+        type:
+          enum:
+            - common
+            - increase
+            - data
+            - data_increase
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    user.ListExportsOutput:
+      properties:
+        exports:
+          items:
+            $ref: "#/components/schemas/user.Export"
+          type: array
+        total:
+          type: integer
+      type: object
+    user.ListMemberAclsOutput:
+      properties:
+        memberAcls:
+          items:
+            $ref: "#/components/schemas/user.MemberAcl"
+          type: array
+        total:
+          type: integer
+      type: object
+    user.ListPropertiesOutput:
+      properties:
+        properties:
+          additionalProperties:
+            type: string
+          type: object
+      type: object
+    user.ListRepositoriesOutput:
+      properties:
+        repositories:
+          items:
+            $ref: "#/components/schemas/user.Repository"
+          type: array
+        total:
+          type: integer
+      type: object
+    user.ListTagsOutput:
+      properties:
+        tags:
+          items:
+            $ref: "#/components/schemas/user.Tag"
+          type: array
+        total:
+          type: integer
+      type: object
+    user.MemberAcl:
+      properties:
+        id:
+          type: string
+        tag:
+          $ref: "#/components/schemas/user.tagInfo"
+        user:
+          $ref: "#/components/schemas/user.userInfo"
+      type: object
+    user.ProjectAcl:
+      properties:
+        id:
+          type: string
+        project:
+          $ref: "#/components/schemas/user.projectInfo"
+        tag:
+          $ref: "#/components/schemas/user.tagInfo"
+      type: object
+    user.Repository:
+      properties:
+        count:
+          type: integer
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/user.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/user.projectInfo"
+        tags:
+          description: for ui/ux create filter
+          items:
+            $ref: "#/components/schemas/user.tagInfo"
+          type: array
+        updatedAt:
+          type: string
+      type: object
+    user.Tag:
+      properties:
+        createdAt:
+          type: string
+        extra:
+          additionalProperties: true
+          type: object
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        referenceTarget:
+          type: string
+        repository:
+          $ref: "#/components/schemas/user.repositoryInfo"
+        size:
+          type: integer
+        status:
+          description: deprecated
+          type: string
+        tagStatus:
+          enum:
+            - queued
+            - preparing
+            - active
+            - deactive
+            - error
+            - importing
+          type: string
+        type:
+          enum:
+            - common
+            - increase
+            - data
+            - data_increase
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    user.UpdateRepositoryInput:
+      properties:
+        description:
+          type: string
+        name:
+          type: string
+        owner:
+          description: 只有 TENANT_OWNER, TENANT_ADMIN 才可以更新 Owner
+          type: string
+      type: object
+    user.UpdateRepositoryOutput:
+      properties:
+        count:
+          type: integer
+        createdAt:
+          type: string
+        creator:
+          $ref: "#/components/schemas/user.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/user.projectInfo"
+        tags:
+          description: for ui/ux create filter
+          items:
+            $ref: "#/components/schemas/user.tagInfo"
+          type: array
+        updatedAt:
+          type: string
+      type: object
+    user.UpdateTagInput:
+      properties:
+        name:
+          type: string
+      type: object
+    user.UpdateTagOutput:
+      properties:
+        createdAt:
+          type: string
+        extra:
+          additionalProperties: true
+          type: object
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        referenceTarget:
+          type: string
+        repository:
+          $ref: "#/components/schemas/user.repositoryInfo"
+        size:
+          type: integer
+        status:
+          description: deprecated
+          type: string
+        tagStatus:
+          enum:
+            - queued
+            - preparing
+            - active
+            - deactive
+            - error
+            - importing
+          type: string
+        type:
+          enum:
+            - common
+            - increase
+            - data
+            - data_increase
+          type: string
+        updatedAt:
+          type: string
+      type: object
+    user.UpdateTagPropertiesInput:
+      properties:
+        properties:
+          additionalProperties:
+            type: string
+          description: 'hw_firmware_type: one of "bios" or "uefi". hw_disk_bus: one of
+            scsi, virtio, ide, sata, usb. hw_machine_type: one of q35 or
+            i440fx.'
+          type: object
+      required:
+        - properties
+      type: object
+    user.UpdateTagPropertiesOutput:
+      properties:
+        properties:
+          additionalProperties:
+            type: string
+          type: object
+      type: object
+    user.UploadImageInput:
+      properties:
+        containerFormat:
+          enum:
+            - bare
+          type: string
+        description:
+          type: string
+        diskFormat:
+          enum:
+            - qcow2
+            - raw
+          type: string
+        extra:
+          items:
+            type: integer
+          type: array
+        filepath:
+          type: string
+        name:
+          type: string
+        operatingSystem:
+          enum:
+            - linux
+            - windows
+            - none
+          type: string
+        repositoryId:
+          type: string
+        tagId:
+          type: string
+        tagType:
+          enum:
+            - common
+            - data
+          type: string
+        version:
+          type: string
+      required:
+        - filepath
+      type: object
+    user.UploadImageOutput:
+      properties:
+        repository:
+          $ref: "#/components/schemas/user.repositoryInfo"
+        tag:
+          $ref: "#/components/schemas/user.tagInfo"
+      type: object
+    user.projectInfo:
+      properties:
+        displayName:
+          type: string
+        id:
+          type: string
+      type: object
+    user.repositoryInfo:
+      properties:
+        creator:
+          $ref: "#/components/schemas/user.userInfo"
+        description:
+          type: string
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        namespace:
+          type: string
+        operatingSystem:
+          type: string
+        project:
+          $ref: "#/components/schemas/user.projectInfo"
+      type: object
+    user.tagInfo:
+      properties:
+        global:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+      type: object
+    user.userInfo:
+      properties:
+        account:
+          type: string
+        displayName:
+          type: string
+        id:
+          type: string
+      type: object
+

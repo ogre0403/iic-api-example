@@ -1,0 +1,426 @@
+// Collapse state for the first-level groups, persisted per spec switch.
+const l1Collapsed = { Admin: true, User: true };
+
+// Key used for storing the collapse state of the current tab.
+let _collapseKey = 'iic_collapse_' + (localStorage.getItem('iic_active_tab') || 'iam.yaml');
+
+function loadCollapseState(tabFile) {
+  _collapseKey = 'iic_collapse_' + tabFile;
+  try {
+    const saved = JSON.parse(localStorage.getItem(_collapseKey));
+    if (saved && typeof saved === 'object') {
+      l1Collapsed.Admin = saved.Admin !== false;
+      l1Collapsed.User  = saved.User  !== false;
+      return;
+    }
+  } catch (e) {}
+  // Default: both groups collapsed.
+  l1Collapsed.Admin = true;
+  l1Collapsed.User  = true;
+}
+
+// Expand the L1 group that contains the currently active endpoint (from hash).
+// Called after Stoplight finishes rendering so the sidebar rows exist.
+function expandGroupForHash() {
+  const hash = window.location.hash; // e.g. #/operations/listServers
+  if (!hash) return;
+  const root = document.getElementById('api-viewer');
+  if (!root) return;
+
+  // Find the sidebar row whose href matches the hash.
+  const allLinks = root.querySelectorAll('a[href]');
+  for (const link of allLinks) {
+    const href = link.getAttribute('href') || '';
+    if (href === hash || href.endsWith(hash)) {
+      // Walk up to find the closest L2 tag item which carries data-l1group.
+      let el = link;
+      while (el && el !== root) {
+        if (el.dataset && el.dataset.l1group) {
+          const group = el.dataset.l1group;
+          if (l1Collapsed[group]) {
+            l1Collapsed[group] = false;
+            saveCollapseState();
+            // Update the header element to reflect the new state.
+            const container = el.parentElement;
+            if (container) {
+              const header = Array.from(container.children).find(
+                (c) => c.classList && c.classList.contains('group-l1-header') && c.dataset.l1group === group
+              );
+              if (header) header.classList.remove('collapsed');
+              applyCollapseState(container);
+            }
+          }
+          return;
+        }
+        el = el.parentElement;
+      }
+    }
+  }
+}
+
+function saveCollapseState() {
+  localStorage.setItem(_collapseKey, JSON.stringify({ Admin: l1Collapsed.Admin, User: l1Collapsed.User }));
+}
+
+// Apply the two-level grouping to the Stoplight Elements sidebar.
+// Level 1: "Admin" / "User" (derived from the tag prefix before the first "/").
+// Level 2: the original tag (kept intact, just shown without the prefix).
+function applyGrouping() {
+  const root = document.getElementById('api-viewer');
+  if (!root) return;
+
+  // Find the "Endpoints" label; the tag items are its following siblings.
+  const labels = root.querySelectorAll('div');
+  let endpointsLabel = null;
+  for (const el of labels) {
+    if (el.childElementCount === 0 && el.textContent.trim() === 'Endpoints') {
+      endpointsLabel = el;
+      break;
+    }
+  }
+  if (!endpointsLabel) return;
+
+  const container = endpointsLabel.parentElement;
+  if (!container) return;
+
+  // Collect the top-level tag items (those with a title like "Admin/..." or "User/...").
+  const tagItems = Array.from(container.children).filter((el) => {
+    const title = el.getAttribute && el.getAttribute('title');
+    return title && /^(Admin|User)\//.test(title);
+  });
+  if (tagItems.length === 0) return;
+
+  // If we've already injected our headers and nothing structurally changed, skip.
+  // (Re-running is safe but we avoid needless DOM churn.)
+  const alreadyGrouped = container.querySelector('.group-l1-header');
+  if (alreadyGrouped && container.querySelectorAll('.group-l1-header').length >= 1) {
+    // Still ensure labels/indent are correct (Stoplight may re-render rows).
+    decorateChildren(tagItems);
+    return;
+  }
+
+  decorateChildren(tagItems);
+
+  // Insert L1 group headers before the first item of each group.
+  ['User', 'Admin'].forEach((groupName) => {
+    const first = tagItems.find(
+      (el) => (el.getAttribute('title') || '').split('/')[0] === groupName
+    );
+    if (!first) return;
+    if (
+      first.previousElementSibling &&
+      first.previousElementSibling.classList.contains('group-l1-header')
+    ) {
+      return; // header already present
+    }
+    const header = buildHeader(groupName);
+    container.insertBefore(header, first);
+  });
+
+  applyCollapseState(container);
+}
+
+// Relabel each tag item to show only the second-level tag and mark it as a child.
+function decorateChildren(tagItems) {
+  tagItems.forEach((el) => {
+    const title = el.getAttribute('title') || '';
+    const group = title.split('/')[0];
+    const sub = title.slice(group.length + 1);
+    el.classList.add('group-l1-child');
+    el.dataset.l1group = group;
+
+    // The visible label is the first inner text div.
+    const labelEl = el.querySelector('div');
+    if (labelEl && labelEl.textContent.trim() === title) {
+      labelEl.textContent = sub;
+    }
+  });
+}
+
+function buildHeader(groupName) {
+  const header = document.createElement('div');
+  header.className = 'group-l1-header';
+  header.dataset.l1group = groupName;
+  if (l1Collapsed[groupName]) header.classList.add('collapsed');
+
+  const caret = document.createElement('span');
+  caret.className = 'group-l1-caret';
+  caret.textContent = '\u25BC'; // ▼
+
+  const label = document.createElement('span');
+  label.textContent = groupName;
+
+  header.appendChild(caret);
+  header.appendChild(label);
+
+  header.addEventListener('click', () => {
+    l1Collapsed[groupName] = !l1Collapsed[groupName];
+    header.classList.toggle('collapsed', l1Collapsed[groupName]);
+    applyCollapseState(header.parentElement);
+    saveCollapseState();
+  });
+
+  return header;
+}
+
+// Show/hide child items based on the collapse state of each L1 group.
+//
+// The sidebar is a flat list of rows in document order:
+//   [L1 header: User]
+//     [L2 tag] [L3 op] [L3 op] ...
+//     [L2 tag] [L3 op] ...
+//   [L1 header: Admin]
+//     [L2 tag] [L3 op] ...
+//
+// Only the L1 headers and L2 tag items carry a `data-l1group` attribute.
+// The L3 operation rows (shown when an L2 tag is expanded) do NOT, so we
+// must infer their group from the most recent header / L2 tag we've seen
+// while walking the list. Otherwise collapsing an L1 group would leave the
+// expanded endpoint rows visible.
+function applyCollapseState(container) {
+  if (!container) return;
+  let currentGroup = null;
+  Array.from(container.children).forEach((el) => {
+    const isHeader = el.classList && el.classList.contains('group-l1-header');
+    const ownGroup = el.dataset && el.dataset.l1group;
+
+    if (isHeader) {
+      // Header itself stays visible; it only updates the current group.
+      currentGroup = ownGroup;
+      return;
+    }
+
+    if (ownGroup) {
+      // An L2 tag item explicitly tells us which group we're now in.
+      currentGroup = ownGroup;
+    }
+
+    // Rows before the first header (if any) have no group; leave them alone.
+    if (!currentGroup) return;
+
+    el.style.display = l1Collapsed[currentGroup] ? 'none' : '';
+  });
+}
+
+
+// Watch the viewer for re-renders (navigation, spec switch) and re-apply grouping.
+let observer = null;
+function observeViewer() {
+  const root = document.getElementById('api-viewer');
+  if (!root) return;
+  if (observer) observer.disconnect();
+  observer = new MutationObserver(() => {
+    // Debounce slightly to let Stoplight finish rendering a batch.
+    clearTimeout(observeViewer._t);
+    observeViewer._t = setTimeout(() => {
+      applyGrouping();
+      expandGroupForHash();
+    }, 50);
+  });
+  observer.observe(root, { childList: true, subtree: true });
+  applyGrouping();
+  expandGroupForHash();
+}
+
+function switchApi(file, el, restoreHash) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  // Persist the selected tab so it survives a page refresh.
+  localStorage.setItem('iic_active_tab', file);
+  // Load the collapse state for the new tab.
+  loadCollapseState(file);
+
+  // Determine which hash to restore BEFORE touching the DOM / hash.
+  const hashToRestore = restoreHash !== undefined
+    ? restoreHash
+    : (localStorage.getItem('iic_hash_' + file) || '');
+
+  // Block hashchange from overwriting saved hashes while we rebuild.
+  _switching = true;
+
+  // Remove and recreate the element to force Stoplight Elements to reload the spec.
+  const container = document.querySelector('.viewer');
+  const old = document.getElementById('api-viewer');
+  container.removeChild(old);
+
+  // Clear the hash so Stoplight doesn't carry over the previous page's route.
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+
+  const next = document.createElement('elements-api');
+  next.id = 'api-viewer';
+  next.setAttribute('apiDescriptionUrl', file);
+  next.setAttribute('router', 'hash');
+  next.setAttribute('layout', 'sidebar');
+  next.setAttribute('hideSchemas', 'true');
+  next.setAttribute('hideExport', 'true');
+  container.appendChild(next);
+  observeViewer();
+
+  if (hashToRestore) {
+    // Wait until Stoplight has rendered the sidebar (links appear) before
+    // navigating, then re-enable hash persistence.
+    applyHashWhenReady(next, hashToRestore);
+  } else {
+    // No hash to restore; re-enable hash persistence after a short settle.
+    setTimeout(() => { _switching = false; }, 600);
+  }
+
+  setTimeout(fixRightColScroll, 800);
+}
+
+// Poll until the elements-api shadow DOM contains sidebar links, then set the hash.
+function applyHashWhenReady(apiEl, hash, attempt) {
+  attempt = attempt || 0;
+  if (attempt > 40) { _switching = false; return; } // give up after ~2 s
+
+  // Check if Stoplight has rendered at least one sidebar link.
+  function hasLinks(el) {
+    if (!el) return false;
+    if (el.querySelectorAll) {
+      const links = el.querySelectorAll('a[href]');
+      if (links.length > 0) return true;
+    }
+    if (el.shadowRoot && hasLinks(el.shadowRoot)) return true;
+    for (const c of (el.children || [])) { if (hasLinks(c)) return true; }
+    return false;
+  }
+
+  if (hasLinks(apiEl)) {
+    window.location.hash = hash;
+    // Keep _switching on a bit longer so the resulting hashchange is ignored.
+    setTimeout(() => { _switching = false; }, 300);
+  } else {
+    setTimeout(() => applyHashWhenReady(apiEl, hash, attempt + 1), 50);
+  }
+}
+
+// ---- Right-column scroll following ----------------------------------------
+// CSS `position: sticky` cannot work here: the sticky element's own height
+// (~774px) nearly fills the scroll-container's scrollHeight (~1291px), so
+// sticky "bottoms out" almost immediately leaving most of the page unfollowed.
+//
+// Instead we listen to the Stoplight scroll container and shift the right
+// column down via `transform: translateY` to simulate sticky, clamping so
+// it never overflows past the bottom of its HttpOperation.
+
+let scrollListenerCleanup = null;
+
+function findScrollContainer(root) {
+  function walk(el) {
+    if (!el) return null;
+    const children = el.shadowRoot
+      ? Array.from(el.shadowRoot.children)
+      : Array.from(el.children || []);
+    for (const child of children) {
+      const cs = window.getComputedStyle(child);
+      if (cs.overflowY === 'auto' || cs.overflowY === 'scroll') return child;
+      const found = walk(child);
+      if (found) return found;
+    }
+    return null;
+  }
+  return walk(root);
+}
+
+function fixRightColScroll() {
+  const root = document.getElementById('api-viewer');
+  if (!root) return;
+
+  if (scrollListenerCleanup) { scrollListenerCleanup(); scrollListenerCleanup = null; }
+
+  const sc = findScrollContainer(root);
+  if (!sc) return;
+
+  function onScroll() {
+    const scrollTop = sc.scrollTop;
+    const GAP = 24;
+
+    function walkForOps(el) {
+      if (!el) return;
+      const ops = el.querySelectorAll ? el.querySelectorAll('.HttpOperation') : [];
+      for (const op of ops) {
+        for (const child of op.children) {
+          if (child.classList.contains('sl-flex') && !child.classList.contains('sl-flex-col')) {
+            for (const gc of child.children) {
+              if (gc.classList.contains('sl-relative')) {
+                const opOffsetTop = op.offsetTop;
+                const rightH = gc.offsetHeight;
+                const leftH  = op.offsetHeight;
+                const raw    = scrollTop - opOffsetTop + GAP;
+                const max    = Math.max(0, leftH - rightH - GAP);
+                const shift  = Math.min(Math.max(raw, 0), max);
+                gc.style.transform = `translateY(${shift}px)`;
+              }
+            }
+          }
+        }
+      }
+      if (el.shadowRoot) walkForOps(el.shadowRoot);
+      for (const c of (el.children || [])) walkForOps(c);
+    }
+
+    walkForOps(root);
+  }
+
+  sc.addEventListener('scroll', onScroll, { passive: true });
+  onScroll(); // position correctly on initial load / navigation
+
+  scrollListenerCleanup = () => sc.removeEventListener('scroll', onScroll);
+}
+
+// ---------------------------------------------------------------------------
+// Hash persistence
+// ---------------------------------------------------------------------------
+// Stoplight Elements uses React Router which calls history.pushState instead
+// of setting location.hash directly, so 'hashchange' never fires.
+// We use two complementary strategies:
+//   1. 'popstate' — catches browser back/forward and some React Router updates
+//   2. A polling interval — catches all React Router pushState navigations
+//
+// _switching is true while we are programmatically restoring a hash so we
+// don't accidentally overwrite the just-restored value.
+let _switching = false;
+let _lastHash  = '';
+
+function persistHash() {
+  if (_switching) return;
+  const h = window.location.hash;
+  if (h && h !== _lastHash) {
+    _lastHash = h;
+    const currentTab = localStorage.getItem('iic_active_tab') || 'iam.yaml';
+    localStorage.setItem('iic_hash_' + currentTab, h);
+    setTimeout(fixRightColScroll, 400);
+  }
+}
+
+// popstate fires on back/forward navigation
+window.addEventListener('popstate', persistHash);
+
+// Poll every 300 ms to catch React Router pushState navigations
+setInterval(persistHash, 300);
+
+// Initial wiring once the page is ready.
+window.addEventListener('load', () => {
+  const savedTab  = localStorage.getItem('iic_active_tab');
+
+  if (savedTab) {
+    // Find the tab button whose onclick targets the saved spec file.
+    const btn = Array.from(document.querySelectorAll('.tab-btn')).find(
+      (b) => (b.getAttribute('onclick') || '').includes(`'${savedTab}'`)
+    );
+    if (btn) {
+      // Restore collapse state for this tab before switching.
+      loadCollapseState(savedTab);
+      // Switch to the saved tab and restore the per-tab saved hash.
+      const savedHash = localStorage.getItem('iic_hash_' + savedTab) || '';
+      switchApi(savedTab, btn, savedHash);
+      return;
+    }
+  }
+
+  // Default: first tab (iam.yaml) — record it so persistHash has a valid key.
+  localStorage.setItem('iic_active_tab', 'iam.yaml');
+  loadCollapseState('iam.yaml');
+  observeViewer();
+  setTimeout(fixRightColScroll, 800);
+});

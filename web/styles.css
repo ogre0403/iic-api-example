@@ -1,0 +1,261 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  height: 50px;
+  background: #1c2333;
+  flex-shrink: 0;
+}
+
+.topbar-title {
+  color: #e2e8f0;
+  font-size: 15px;
+  font-weight: 600;
+  margin-right: 16px;
+  white-space: nowrap;
+}
+
+.tab-btn {
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tab-btn:hover {
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+.tab-btn.active {
+  background: #2563eb;
+  color: #fff;
+}
+
+.viewer {
+  flex: 1;
+  overflow: hidden;
+}
+
+elements-api {
+  display: block;
+  height: 100%;
+  zoom: 1.2;
+}
+
+/* ---- Make the right-side content panel fill the available space ----
+   Stoplight's SidebarLayout renders the content like this:
+     <Box className="... sl-px-24" ...>          // 96px L/R padding
+       <Box style="max-width: <1800 - sidebar>px" className="... sl-py-16"> // 64px T/B padding
+         {content}
+       </Box>
+     </Box>
+   The outer px-24 plus the inner max-width + py-16 create the large
+   empty margins. We shrink the padding and remove the max-width cap so
+   the docs stretch across (almost) the whole viewer. */
+
+/* Outer scroll container: cut the 96px side padding down to a small gutter. */
+elements-api .sl-elements-api .sl-overflow-y-auto.sl-px-24 {
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+/* Inner content box: drop the inline max-width and reduce the 64px
+   top/bottom padding. The max-width is an inline style, so !important
+   is required to override it. */
+elements-api .sl-elements-api .sl-overflow-y-auto.sl-px-24 > .sl-py-16 {
+  max-width: none !important;
+  padding-top: 24px !important;
+  padding-bottom: 24px !important;
+}
+
+/* ---- Re-arrange the operation (HttpOperation) content into
+        "left column + right column", where the LEFT column is itself
+        split into top (the title/method/URL header) and bottom (the
+        Request / Responses documentation).
+
+   Stoplight renders an operation like this (vertical stack):
+     <div class="HttpOperation ...">          // TOP + BOTTOM stack
+       <div class="sl-stack--5 ...">{header}</div>     // child 1 = header
+       <div class="sl-flex">                            // child 2 = row
+         <div class="sl-flex-1 sl-w-0">{docs}</div>     //   left  = docs
+         <div class="sl-w-2/5 sl-ml-16">{tryit}</div>   //   right = TryIt
+       </div>
+     </div>
+
+   Because the TryIt panel lives inside the lower row, it can never use
+   the vertical space occupied by the header above it. We turn the whole
+   HttpOperation into a 2-column CSS grid so the TryIt panel spans the
+   full height on the right, while the header + docs stack on the left. */
+elements-api .sl-elements-api .HttpOperation {
+  display: grid !important;
+  grid-template-columns: 2fr minmax(0, 3fr);
+  grid-template-rows: auto 1fr;
+  column-gap: 32px;
+  align-items: start;
+  width: 100%;
+}
+
+/* Header (title + method + URL): top of the LEFT column.
+   NOTE: the header element itself carries the `sl-flex` class, so we
+   pin it explicitly and must EXCLUDE it from the row-dissolving rule
+   below (which is why that rule uses :not(.sl-flex-col)). */
+elements-api .sl-elements-api .HttpOperation > div:first-child {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+/* The lower row wrapper (a plain flex row, NOT the flex-col header) must
+   "dissolve" so that its two children (docs and TryIt) become direct
+   grid items of the HttpOperation grid. */
+elements-api .sl-elements-api .HttpOperation > div.sl-flex:not(.sl-flex-col) {
+  display: contents !important;
+}
+
+/* Documentation column (Request / Responses): bottom of the LEFT column. */
+elements-api .sl-elements-api .HttpOperation > div.sl-flex:not(.sl-flex-col) > .sl-flex-1 {
+  grid-column: 1;
+  grid-row: 2;
+  width: auto !important;
+  min-width: 0;
+}
+
+/* TryIt / Request Sample / Response Example: the RIGHT column.
+   We place it in grid-column 2, spanning both rows so the grid
+   reserves that space, but the sticky element itself is only as tall
+   as its content, which gives the full left-column height as the
+   sticky scroll range. */
+elements-api .sl-elements-api .HttpOperation > div.sl-flex:not(.sl-flex-col) > .sl-relative {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: auto !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  /* align-self: start keeps the element at its natural content height
+     so sticky has the maximum possible scroll range */
+  align-self: start;
+}
+
+/* Right-column stickiness is handled by JS (fixRightColScroll).
+   CSS sticky cannot work here because the sticky element's height nearly
+   fills the scroll-container scrollHeight, leaving almost no scroll range. */
+elements-api .sl-elements-api .HttpOperation > div.sl-flex:not(.sl-flex-col) > .sl-relative > .sl-stack {
+  position: relative;
+}
+
+/* The right column carries sl-w-2/5 which Stoplight caps at max-width:500px.
+   Override that cap so the panel fills the full grid column. */
+elements-api .sl-elements-api .HttpOperation .sl-w-2\/5 {
+  max-width: none !important;
+  width: 100% !important;
+}
+
+/* The code viewer for response body has overflow-x: hidden on its wrapper,
+   preventing horizontal scroll. Allow overflow so the full JSON is reachable. */
+elements-api .sl-elements-api .HttpOperation .sl-code-viewer.sl-overflow-x-hidden {
+  overflow-x: auto !important;
+}
+
+/* Also allow the response panel container to scroll horizontally */
+elements-api .sl-elements-api .HttpOperation .sl-overflow-y-hidden.sl-rounded-lg {
+  overflow-x: auto !important;
+}
+
+/* Wrap long lines in the response code viewer so content fits without scrolling */
+elements-api .sl-elements-api .HttpOperation .sl-code-viewer__scroller pre,
+elements-api .sl-elements-api .HttpOperation .sl-code-viewer__scroller code {
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+}
+
+/* Hide the "Response Example" panel (last child in the right-column stack) */
+elements-api .sl-elements-api .HttpOperation > div.sl-flex:not(.sl-flex-col) > .sl-relative .sl-stack--vertical > .sl-panel:last-child {
+  display: none !important;
+}
+
+/* First-level (Admin / User) collapsible group header injected by us */
+.group-l1-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+  padding: 6px 16px;
+  margin-top: 8px;
+  color: var(--color-text-muted, #64748b);
+}
+
+.group-l1-header:hover {
+  background: var(--color-canvas-200, #e2e8f0);
+}
+
+.group-l1-header .group-l1-caret {
+  display: inline-block;
+  transition: transform 0.15s ease;
+  font-size: 0.7em;
+}
+
+.group-l1-header.collapsed .group-l1-caret {
+  transform: rotate(-90deg);
+}
+
+/* Indent the original (second-level) tag items that live under a L1 group.
+   Sit between the L1 header (User/Admin, 16px) and the lowest level (44px). */
+.group-l1-child > div:first-child,
+.group-l1-child > a > div:first-child {
+  padding-left: 18px !important;
+}
+
+/* Third-level operation rows (the lowest level, shown with a bullet icon).
+   Indent them deeper than the second-level tag so the hierarchy reads correctly. */
+a.ElementsTableOfContentsItem[href*="/paths/"] > div:first-child,
+a.ElementsTableOfContentsItem[href*="/operations/"] > div:first-child {
+  padding-left: 44px !important;
+}
+
+/* ---- Prevent URL truncation with ellipsis in the operation header ----
+   The method+URL bar in the HttpOperation header clips the URL with
+   overflow-x: hidden when it is too long.  We let the URL wrap across
+   multiple lines instead.
+
+   DOM structure (simplified):
+     .HttpOperation > div:first-child          (header: title + URL row)
+       .sl-stack--horizontal                   (flex row: badge + URL)
+         .sl-flex.sl-overflow-x-hidden         ← clips the URL to one line
+           .sl-overflow-x-hidden.sl-truncate   ← the URL text node
+*/
+
+/* Remove the overflow clipping on the flex wrapper that holds the URL text. */
+elements-api .sl-elements-api .HttpOperation > div:first-child .sl-overflow-x-hidden {
+  overflow: visible !important;
+  overflow-x: visible !important;
+}
+
+/* Let the URL text itself wrap instead of truncating. */
+elements-api .sl-elements-api .HttpOperation > div:first-child .sl-truncate {
+  overflow: visible !important;
+  text-overflow: unset !important;
+  white-space: normal !important;
+  word-break: break-all !important;
+}

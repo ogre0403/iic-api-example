@@ -4,8 +4,44 @@ info:
   description: Virtual Platform Service API
   title: VPS API
   version: "v.0.4.27"
+tags:
+  - name: User/root_features
+  - name: User/auto_scale_group
+  - name: User/flavor
+  - name: User/floating_ip
+  - name: User/keypair
+  - name: User/loadbalancer
+  - name: User/network
+  - name: User/quota
+  - name: User/router
+  - name: User/security_group
+  - name: User/server
+  - name: User/share
+  - name: User/snapshots
+  - name: User/volume_types
+  - name: User/volumes
+  - name: User/snapshot-schedules
+  - name: User/root_version
+  - name: Admin/asg
+  - name: Admin/az
+  - name: Admin/extnet
+  - name: Admin/flavor
+  - name: Admin/fip
+  - name: Admin/gpu_model
+  - name: Admin/loadbalancer
+  - name: Admin/net_qos
+  - name: Admin/network
+  - name: Admin/opsk
+  - name: Admin/provider_network
+  - name: Admin/quota
+  - name: Admin/server
+  - name: Admin/share
+  - name: Admin/action
+  - name: Admin/voltype
+  - name: Admin/volume
+  - name: Admin/volume_type
 paths:
-  /vps/api/v1/admin/auto_scale_groups:
+  /admin/auto_scale_groups:
     get:
       description: >-
         List all auto scaling groups across all projects with admin privileges.
@@ -90,8 +126,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List Auto Scaling Groups (Admin)
       tags:
-        - system_asg
-  "/vps/api/v1/admin/auto_scale_groups/{asg-id}":
+        - Admin/asg
+  "/admin/auto_scale_groups/{asg-id}":
     get:
       description: Get detailed information about a specific auto scaling group with
         admin privileges.
@@ -129,8 +165,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Get Auto Scaling Group (Admin)
       tags:
-        - system_asg
-  /vps/api/v1/admin/az/compute:
+        - Admin/asg
+  /admin/az/compute:
     get:
       description: Return nova availability zone info.
       responses:
@@ -156,8 +192,8 @@ paths:
         - bearerAuth: []
       summary: List Nova AZ
       tags:
-        - system_az
-  /vps/api/v1/admin/extnetworks:
+        - Admin/az
+  /admin/extnetworks:
     get:
       description: Return all available external networks.
       responses:
@@ -183,7 +219,7 @@ paths:
         - bearerAuth: []
       summary: List external networks
       tags:
-        - system_extnet
+        - Admin/extnet
     post:
       description: >-
         This API will import a given external network into VPS if it exists in
@@ -229,8 +265,8 @@ paths:
         - bearerAuth: []
       summary: Import external network
       tags:
-        - system_extnet
-  "/vps/api/v1/admin/extnetworks/{extnet-id}":
+        - Admin/extnet
+  "/admin/extnetworks/{extnet-id}":
     delete:
       description: This operation deletes an external network from VPS.
       parameters:
@@ -259,7 +295,7 @@ paths:
         - bearerAuth: []
       summary: Delete external network
       tags:
-        - system_extnet
+        - Admin/extnet
     get:
       description: Return information of specific external network.
       parameters:
@@ -292,7 +328,7 @@ paths:
         - bearerAuth: []
       summary: Get external network
       tags:
-        - system_extnet
+        - Admin/extnet
     put:
       description: |-
         This method updates description of a particular external network.
@@ -336,8 +372,8 @@ paths:
         - bearerAuth: []
       summary: Update external network
       tags:
-        - system_extnet
-  "/vps/api/v1/admin/extnetworks/{extnet-id}/default":
+        - Admin/extnet
+  "/admin/extnetworks/{extnet-id}/default":
     post:
       description: This API sets specified external network as default one for its
         namespace.
@@ -367,8 +403,8 @@ paths:
         - bearerAuth: []
       summary: Set external network as default
       tags:
-        - system_extnet
-  "/vps/api/v1/admin/extnetworks/{extnet-id}/ports":
+        - Admin/extnet
+  "/admin/extnetworks/{extnet-id}/ports":
     get:
       description: List all ports on the specific external network
       parameters:
@@ -399,8 +435,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List ports on external network
       tags:
-        - system_extnet
-  "/vps/api/v1/admin/extnetworks/{extnet-id}/ports/{port-id}":
+        - Admin/extnet
+  "/admin/extnetworks/{extnet-id}/ports/{port-id}":
     get:
       description: Gets detailed information about a single port.
       parameters:
@@ -437,8 +473,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Get port
       tags:
-        - system_extnet
-  "/vps/api/v1/admin/extnetworks/{extnet-id}/ports/{port-id}/action":
+        - Admin/extnet
+  "/admin/extnetworks/{extnet-id}/ports/{port-id}/action":
     post:
       description: Do an action on the specified port
       parameters:
@@ -478,8 +514,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Do Action to Port
       tags:
-        - system_extnet
-  "/vps/api/v1/admin/extnetworks/{extnet-id}/project/{project-id}":
+        - Admin/extnet
+  "/admin/extnetworks/{extnet-id}/project/{project-id}":
     post:
       description: Associates given project with provided external network.
       parameters:
@@ -514,8 +550,8 @@ paths:
         - bearerAuth: []
       summary: Associate project with extnetworks
       tags:
-        - system_extnet
-  "/vps/api/v1/admin/extnetworks/{extnet-id}/usage":
+        - Admin/extnet
+  "/admin/extnetworks/{extnet-id}/usage":
     get:
       description: This API returns the number of IPs used and total on given external
         network.
@@ -549,8 +585,8 @@ paths:
         - bearerAuth: []
       summary: get IP usage
       tags:
-        - system_extnet
-  /vps/api/v1/admin/extnetworks/associations:
+        - Admin/extnet
+  /admin/extnetworks/associations:
     get:
       description: >-
         This api lists all associations between projects and external networks.
@@ -579,8 +615,8 @@ paths:
         - bearerAuth: []
       summary: list all Associations
       tags:
-        - system_extnet
-  /vps/api/v1/admin/flavors:
+        - Admin/extnet
+  /admin/flavors:
     get:
       description: Return all flavors with optional filter.
       parameters:
@@ -632,7 +668,7 @@ paths:
         - bearerAuth: []
       summary: List Flavors
       tags:
-        - system_flavor
+        - Admin/flavor
     post:
       description: >-
         Create a new flavor with specified parameters.
@@ -693,8 +729,8 @@ paths:
         - bearerAuth: []
       summary: Create Flavor
       tags:
-        - system_flavor
-  "/vps/api/v1/admin/flavors/{flavor-id}":
+        - Admin/flavor
+  "/admin/flavors/{flavor-id}":
     delete:
       description: This operation deletes an existing flavor by its unique identifier.
       parameters:
@@ -723,7 +759,7 @@ paths:
         - bearerAuth: []
       summary: Delete Flavor
       tags:
-        - system_flavor
+        - Admin/flavor
     get:
       description: Return information about an existing flavor identified by its
         unique identifier.
@@ -757,7 +793,7 @@ paths:
         - bearerAuth: []
       summary: Get Flavor
       tags:
-        - system_flavor
+        - Admin/flavor
     put:
       description: >-
         Modify attributes of an existing flavor identified by its unique
@@ -808,8 +844,8 @@ paths:
         - bearerAuth: []
       summary: Update Flavor
       tags:
-        - system_flavor
-  /vps/api/v1/admin/floatingips:
+        - Admin/flavor
+  /admin/floatingips:
     get:
       description: >-
         List all floating IPs across all projects with admin privileges.
@@ -922,7 +958,7 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List Floating IPs (Admin)
       tags:
-        - system_fip
+        - Admin/fip
     post:
       description: >-
         Create a reserved floating IP for a specific project/user/namespace with
@@ -977,8 +1013,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Create Reserved Floating IP (Admin)
       tags:
-        - system_fip
-  "/vps/api/v1/admin/floatingips/{fip-id}":
+        - Admin/fip
+  "/admin/floatingips/{fip-id}":
     get:
       description: Get detailed information about a specific floating IP with admin
         privileges.
@@ -1016,8 +1052,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Get Floating IP (Admin)
       tags:
-        - system_fip
-  /vps/api/v1/admin/gpu_model:
+        - Admin/fip
+  /admin/gpu_model:
     get:
       description: Return all gpu models and their types of passthough or VGPUs
         available for use by users.
@@ -1044,8 +1080,8 @@ paths:
         - bearerAuth: []
       summary: List All GPU models
       tags:
-        - system_gpu_model
-  /vps/api/v1/admin/loadbalancers:
+        - Admin/gpu_model
+  /admin/loadbalancers:
     get:
       description: >-
         List all load balancers across all projects with admin privileges.
@@ -1117,8 +1153,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List Load Balancers (Admin)
       tags:
-        - system_loadbalancer
-  "/vps/api/v1/admin/loadbalancers/{lb-id}":
+        - Admin/loadbalancer
+  "/admin/loadbalancers/{lb-id}":
     get:
       description: Get detailed information about a specific load balancer with admin
         privileges.
@@ -1156,8 +1192,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Get Load Balancer (Admin)
       tags:
-        - system_loadbalancer
-  /vps/api/v1/admin/net_qos/default:
+        - Admin/loadbalancer
+  /admin/net_qos/default:
     get:
       description: Returns the network QoS Policy used as defaults when creating projects.
       responses:
@@ -1181,7 +1217,7 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: get default network QoS Policy
       tags:
-        - system_net_qos
+        - Admin/net_qos
     put:
       description: Sets the default network QoS Policy that are used as defaults when
         creating projects.
@@ -1208,8 +1244,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: set default network QoS Policy
       tags:
-        - system_net_qos
-  "/vps/api/v1/admin/net_qos/networks/{network-id}":
+        - Admin/net_qos
+  "/admin/net_qos/networks/{network-id}":
     delete:
       description: reset network's QoS Policy as project default value
       parameters:
@@ -1236,7 +1272,7 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: reset network's QoS Policy as project default value
       tags:
-        - system_net_qos
+        - Admin/net_qos
     get:
       description: Return QoS Policy for specific network.
       parameters:
@@ -1267,7 +1303,7 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: get networks's QoS Policy
       tags:
-        - system_net_qos
+        - Admin/net_qos
     put:
       description: Set QoS Policy for specified project.
       parameters:
@@ -1300,8 +1336,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: set network's QoS Policy
       tags:
-        - system_net_qos
-  /vps/api/v1/admin/net_qos/projects:
+        - Admin/net_qos
+  /admin/net_qos/projects:
     get:
       description: Returns network QoS Policies for all projects.
       responses:
@@ -1327,8 +1363,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List All project's Network QoS Policy
       tags:
-        - system_net_qos
-  "/vps/api/v1/admin/net_qos/projects/{project-id}":
+        - Admin/net_qos
+  "/admin/net_qos/projects/{project-id}":
     delete:
       description: reset project's network QoS Policy as default value
       parameters:
@@ -1355,7 +1391,7 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: reset project's network QoS Policy as default value
       tags:
-        - system_net_qos
+        - Admin/net_qos
     get:
       description: Return network QoS Policy for specific project.
       parameters:
@@ -1386,7 +1422,7 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: get project's network QoS Policy
       tags:
-        - system_net_qos
+        - Admin/net_qos
     put:
       description: Set network QoS Policy for specified project.
       parameters:
@@ -1419,8 +1455,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: set project's network QoS Policy
       tags:
-        - system_net_qos
-  /vps/api/v1/admin/networks:
+        - Admin/net_qos
+  /admin/networks:
     get:
       description: |-
         List all networks
@@ -1452,8 +1488,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List Networks
       tags:
-        - system_network
-  "/vps/api/v1/admin/networks/{network-id}":
+        - Admin/network
+  "/admin/networks/{network-id}":
     get:
       description: Gets detailed information about a single network.
       parameters:
@@ -1484,8 +1520,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Get Network
       tags:
-        - system_network
-  "/vps/api/v1/admin/networks/{network-id}/action":
+        - Admin/network
+  "/admin/networks/{network-id}/action":
     post:
       description: Do an action on the specified network
       parameters:
@@ -1523,8 +1559,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Do Action to Network
       tags:
-        - system_network
-  /vps/api/v1/admin/opsk/usages:
+        - Admin/network
+  /admin/opsk/usages:
     get:
       description: Return Opsk Usage Info
       responses:
@@ -1548,8 +1584,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List Usage from IaaS
       tags:
-        - system_opsk
-  /vps/api/v1/admin/opsk_extnetworks:
+        - Admin/opsk
+  /admin/opsk_extnetworks:
     get:
       description: Return a list of the unassociated external networks on OpenStack.
       responses:
@@ -1575,8 +1611,8 @@ paths:
         - bearerAuth: []
       summary: List unused external networks from OPSK
       tags:
-        - system_extnet
-  /vps/api/v1/admin/provider_networks:
+        - Admin/extnet
+  /admin/provider_networks:
     get:
       description: Return a list of provider networks and their details.
       responses:
@@ -1602,7 +1638,7 @@ paths:
         - bearerAuth: []
       summary: List Provider Networks
       tags:
-        - system_provider_network
+        - Admin/provider_network
     post:
       description: >-
         Import an existing openstack network as a provider network into Virtual
@@ -1648,8 +1684,8 @@ paths:
         - bearerAuth: []
       summary: Import Provider Network from OPSK
       tags:
-        - system_provider_network
-  "/vps/api/v1/admin/provider_networks/{net-id}":
+        - Admin/provider_network
+  "/admin/provider_networks/{net-id}":
     delete:
       description: >-
         This will remove the specified provider network from virtual platform
@@ -1682,7 +1718,7 @@ paths:
         - bearerAuth: []
       summary: Delete Provider Network
       tags:
-        - system_provider_network
+        - Admin/provider_network
     get:
       description: Return information about one specific provider network.
       parameters:
@@ -1715,7 +1751,7 @@ paths:
         - bearerAuth: []
       summary: Get Provider Network
       tags:
-        - system_provider_network
+        - Admin/provider_network
     put:
       description: >-
         This operation updates attributes of provider network such as
@@ -1766,8 +1802,8 @@ paths:
         - bearerAuth: []
       summary: Update Provider Network
       tags:
-        - system_provider_network
-  "/vps/api/v1/admin/provider_networks/{net-id}/ports":
+        - Admin/provider_network
+  "/admin/provider_networks/{net-id}/ports":
     get:
       description: |-
         Returns ports which belong to given provider network.
@@ -1802,7 +1838,7 @@ paths:
         - bearerAuth: []
       summary: List ports on Provider Network
       tags:
-        - system_provider_network
+        - Admin/provider_network
     post:
       description: >-
         Creates a new port from the provider network and attaches it to a
@@ -1845,8 +1881,8 @@ paths:
         - bearerAuth: []
       summary: Attach Provider Network to a Server
       tags:
-        - system_provider_network
-  "/vps/api/v1/admin/provider_networks/{net-id}/ports/{port-id}":
+        - Admin/provider_network
+  "/admin/provider_networks/{net-id}/ports/{port-id}":
     delete:
       description: This deletes the specified port from the provider network.
       parameters:
@@ -1881,8 +1917,8 @@ paths:
         - bearerAuth: []
       summary: Delete port on Provider Network
       tags:
-        - system_provider_network
-  "/vps/api/v1/admin/provider_networks/{net-id}/usage":
+        - Admin/provider_network
+  "/admin/provider_networks/{net-id}/usage":
     get:
       description: Retrieves current ip address usgae statistics of the provided
         provider network.
@@ -1916,8 +1952,8 @@ paths:
         - bearerAuth: []
       summary: get IP usage
       tags:
-        - system_provider_network
-  /vps/api/v1/admin/quotas/default:
+        - Admin/provider_network
+  /admin/quotas/default:
     get:
       description: Returns the quota limits used as defaults when creating projects.
       responses:
@@ -1943,7 +1979,7 @@ paths:
         - bearerAuth: []
       summary: get default quotas
       tags:
-        - system_quota
+        - Admin/quota
     put:
       description: >-
         Sets the quota limits that are used as defaults when creating projects.
@@ -1999,8 +2035,8 @@ paths:
         - bearerAuth: []
       summary: set default quotas
       tags:
-        - system_quota
-  /vps/api/v1/admin/quotas/projects:
+        - Admin/quota
+  /admin/quotas/projects:
     get:
       description: Return the current usage and quota limit about each resource type
         for all projects.
@@ -2029,8 +2065,8 @@ paths:
         - bearerAuth: []
       summary: List All project's quotas
       tags:
-        - system_quota
-  "/vps/api/v1/admin/quotas/projects/{project-id}":
+        - Admin/quota
+  "/admin/quotas/projects/{project-id}":
     get:
       description: Return the current usage and quota limit about each resource type
         for specific project.
@@ -2064,7 +2100,7 @@ paths:
         - bearerAuth: []
       summary: get project's quotas
       tags:
-        - system_quota
+        - Admin/quota
     put:
       description: >-
         Set quota limits of each resource type for specified project.
@@ -2125,8 +2161,8 @@ paths:
         - bearerAuth: []
       summary: set project's quotas
       tags:
-        - system_quota
-  /vps/api/v1/admin/servers:
+        - Admin/quota
+  /admin/servers:
     get:
       description: >-
         List all servers across all projects with admin privileges. Supports
@@ -2212,8 +2248,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List Servers (Admin)
       tags:
-        - system_server
-  "/vps/api/v1/admin/servers/{svr-id}":
+        - Admin/server
+  "/admin/servers/{svr-id}":
     get:
       description: Get detailed information about a specific server with admin privileges.
       parameters:
@@ -2250,8 +2286,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Get Server (Admin)
       tags:
-        - system_server
-  /vps/api/v1/admin/shares:
+        - Admin/server
+  /admin/shares:
     get:
       description: >-
         List all shares across all projects with admin privileges. Supports
@@ -2350,8 +2386,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List Shares (Admin)
       tags:
-        - system_share
-  "/vps/api/v1/admin/shares/{share-id}":
+        - Admin/share
+  "/admin/shares/{share-id}":
     get:
       description: Get detailed information about a specific share with admin privileges.
       parameters:
@@ -2388,8 +2424,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Get Share (Admin)
       tags:
-        - system_share
-  /vps/api/v1/admin/system/action:
+        - Admin/share
+  /admin/system/action:
     head:
       description: Verify if a specific system action exists
       parameters:
@@ -2422,8 +2458,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Check system action existence
       tags:
-        - system_action
-  /vps/api/v1/admin/system/actions:
+        - Admin/action
+  /admin/system/actions:
     get:
       description: Get list of all available system actions with their details
       responses:
@@ -2447,8 +2483,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List system actions
       tags:
-        - system_action
-  /vps/api/v1/admin/volume_backends:
+        - Admin/action
+  /admin/volume_backends:
     get:
       description: Return list of volume backend form IaaS.
       responses:
@@ -2474,8 +2510,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List Volume Backends
       tags:
-        - system_voltype
-  /vps/api/v1/admin/volume_types:
+        - Admin/voltype
+  /admin/volume_types:
     get:
       description: Return all volume types with optional filter.
       parameters:
@@ -2527,7 +2563,7 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List Volume Types
       tags:
-        - system_voltype
+        - Admin/voltype
     post:
       description: >-
         Create a new volume type with specified parameters.
@@ -2572,8 +2608,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Create Volume Type
       tags:
-        - system_voltype
-  "/vps/api/v1/admin/volume_types/{voltype-id}":
+        - Admin/voltype
+  "/admin/volume_types/{voltype-id}":
     delete:
       description: This operation deletes an existing volume type by its unique identifier.
       parameters:
@@ -2600,7 +2636,7 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Delete Volume Type
       tags:
-        - system_voltype
+        - Admin/voltype
     get:
       description: Return information about an existing volume type identified by its
         unique identifier.
@@ -2632,7 +2668,7 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Get Volume Type
       tags:
-        - system_voltype
+        - Admin/voltype
     put:
       description: >-
         Modify attributes of an existing volume type identified by its unique
@@ -2683,8 +2719,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Update Volume Type
       tags:
-        - system_voltype
-  /vps/api/v1/admin/volumes:
+        - Admin/voltype
+  /admin/volumes:
     get:
       description: >-
         List all volumes across all projects with admin privileges. Supports
@@ -2769,8 +2805,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: List Volumes (Admin)
       tags:
-        - system_volume
-  "/vps/api/v1/admin/volumes/{vol-id}":
+        - Admin/volume
+  "/admin/volumes/{vol-id}":
     get:
       description: Get detailed information about a specific volume with admin privileges.
       parameters:
@@ -2808,8 +2844,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Get Volume (Admin)
       tags:
-        - system_volume
-  /vps/api/v1/features:
+        - Admin/volume
+  /features:
     get:
       description: Show supported IaaS/Paas feature list in the system.
       responses:
@@ -2833,8 +2869,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Show Features
       tags:
-        - root_features
-  "/vps/api/v1/project/{project-id}/auto_scale_groups/":
+        - User/root_features
+  "/project/{project-id}/auto_scale_groups/":
     get:
       description: >-
         List all autoscale groups of a given Project.
@@ -2912,7 +2948,7 @@ paths:
         - bearerAuth: []
       summary: List AutoScaleGroup
       tags:
-        - auto_scale_group
+        - User/auto_scale_group
     post:
       description: >-
         Create an autoscale group for the specified parameters and returns its
@@ -2949,7 +2985,7 @@ paths:
 
         - boot_script: Configuration information or scripts to use upon server launch. Must be Base64 encoded.(optional)
 
-        - system_volume_type: name of volume type to use for system volume.(optional)
+        - Admin/volume_type: name of volume type to use for system volume.(optional)
       parameters:
         - description: Project ID
           in: path
@@ -2987,8 +3023,8 @@ paths:
         - bearerAuth: []
       summary: Create AutoScaleGroup
       tags:
-        - auto_scale_group
-  "/vps/api/v1/project/{project-id}/auto_scale_groups/{asg-id}":
+        - User/auto_scale_group
+  "/project/{project-id}/auto_scale_groups/{asg-id}":
     delete:
       description: Remove an autoscale group. This operation will terminate instances
         belonging to ASGs. This action cannot revert back once performed!
@@ -3024,7 +3060,7 @@ paths:
         - bearerAuth: []
       summary: Delete AutoScaleGroup
       tags:
-        - auto_scale_group
+        - User/auto_scale_group
     get:
       description: Returns detailed information regarding given autocale group id.
       parameters:
@@ -3063,7 +3099,7 @@ paths:
         - bearerAuth: []
       summary: Get AutoScaleGroup
       tags:
-        - auto_scale_group
+        - User/auto_scale_group
     put:
       description: >-
         Updates attributes of the autocale group.
@@ -3127,8 +3163,8 @@ paths:
         - bearerAuth: []
       summary: Update AutoScaleGroup
       tags:
-        - auto_scale_group
-  "/vps/api/v1/project/{project-id}/auto_scale_groups/{asg-id}/approve":
+        - User/auto_scale_group
+  "/project/{project-id}/auto_scale_groups/{asg-id}/approve":
     post:
       description: >-
         This API allows tenant admins to accept requests from other tenant
@@ -3167,8 +3203,8 @@ paths:
         - bearerAuth: []
       summary: Approve AutoScaleGroup Request
       tags:
-        - auto_scale_group
-  "/vps/api/v1/project/{project-id}/auto_scale_groups/{asg-id}/reject":
+        - User/auto_scale_group
+  "/project/{project-id}/auto_scale_groups/{asg-id}/reject":
     post:
       description: >-
         This API allows tenant admins to decline requests from other tenant
@@ -3207,8 +3243,8 @@ paths:
         - bearerAuth: []
       summary: Reject AutoScaleGroup Request
       tags:
-        - auto_scale_group
-  "/vps/api/v1/project/{project-id}/auto_scale_groups/{asg-id}/servers":
+        - User/auto_scale_group
+  "/project/{project-id}/auto_scale_groups/{asg-id}/servers":
     get:
       description: Return servers associated with given ASG Id.
       parameters:
@@ -3247,8 +3283,8 @@ paths:
         - bearerAuth: []
       summary: List servers created by AutoScaleGroup
       tags:
-        - auto_scale_group
-  "/vps/api/v1/project/{project-id}/auto_scale_groups/{asg-id}/servers/{svr-id}":
+        - User/auto_scale_group
+  "/project/{project-id}/auto_scale_groups/{asg-id}/servers/{svr-id}":
     get:
       description: Return detailed information regarding one particular server being
         managed by ASG.
@@ -3294,8 +3330,8 @@ paths:
         - bearerAuth: []
       summary: Get AutoScaleGroup's server info
       tags:
-        - auto_scale_group
-  "/vps/api/v1/project/{project-id}/auto_scale_groups/{asg-id}/servers/{svr-id}/action":
+        - User/auto_scale_group
+  "/project/{project-id}/auto_scale_groups/{asg-id}/servers/{svr-id}/action":
     post:
       description: >-
         Do actions against selected autoscalegroup's member(server), including
@@ -3353,8 +3389,8 @@ paths:
         - bearerAuth: []
       summary: Do action to AutoScaleGroup's server
       tags:
-        - auto_scale_group
-  "/vps/api/v1/project/{project-id}/auto_scale_groups/{asg-id}/servers/{svr-id}/floatingip":
+        - User/auto_scale_group
+  "/project/{project-id}/auto_scale_groups/{asg-id}/servers/{svr-id}/floatingip":
     post:
       description: >-
         Associates a floating IP to the target server within an Autoscale Group.
@@ -3406,8 +3442,8 @@ paths:
         - bearerAuth: []
       summary: Associate FloatingIP to ASG's server
       tags:
-        - auto_scale_group
-  "/vps/api/v1/project/{project-id}/auto_scale_groups/{asg-id}/servers/{svr-id}/vnc_url":
+        - User/auto_scale_group
+  "/project/{project-id}/auto_scale_groups/{asg-id}/servers/{svr-id}/vnc_url":
     get:
       description: Gets the URL used to connect to the VNC console for a server in asg.
       parameters:
@@ -3452,8 +3488,8 @@ paths:
         - bearerAuth: []
       summary: Get VNC console URL (asg's owner only)
       tags:
-        - auto_scale_group
-  "/vps/api/v1/project/{project-id}/flavors":
+        - User/auto_scale_group
+  "/project/{project-id}/flavors":
     get:
       description: |-
         List all available flavors.
@@ -3513,8 +3549,8 @@ paths:
         - bearerAuth: []
       summary: List Flavors
       tags:
-        - flavor
-  "/vps/api/v1/project/{project-id}/flavors/{flavor-id}":
+        - User/flavor
+  "/project/{project-id}/flavors/{flavor-id}":
     get:
       description: |
         Shows details for a flavor.
@@ -3554,8 +3590,8 @@ paths:
         - bearerAuth: []
       summary: Get Flavor
       tags:
-        - flavor
-  "/vps/api/v1/project/{project-id}/floatingips/":
+        - User/flavor
+  "/project/{project-id}/floatingips/":
     get:
       description: List all floating ips that belong to current project and namespace.
       parameters:
@@ -3633,7 +3669,7 @@ paths:
         - bearerAuth: []
       summary: List floatingIPs
       tags:
-        - floating_ip
+        - User/floating_ip
     post:
       description: |-
         Creates a new floating IP.
@@ -3678,8 +3714,8 @@ paths:
         - bearerAuth: []
       summary: Create floatingIP
       tags:
-        - floating_ip
-  "/vps/api/v1/project/{project-id}/floatingips/{fip-id}":
+        - User/floating_ip
+  "/project/{project-id}/floatingips/{fip-id}":
     delete:
       description: Deletes the specified floating ip address if exists.
       parameters:
@@ -3714,7 +3750,7 @@ paths:
         - bearerAuth: []
       summary: Delete floatingIP
       tags:
-        - floating_ip
+        - User/floating_ip
     get:
       description: Return detailed information of specified floating ip.
       parameters:
@@ -3753,7 +3789,7 @@ paths:
         - bearerAuth: []
       summary: Get floatingIP
       tags:
-        - floating_ip
+        - User/floating_ip
     put:
       description: |-
         Updates an existing floating ip.
@@ -3805,8 +3841,8 @@ paths:
         - bearerAuth: []
       summary: Update floatingIP
       tags:
-        - floating_ip
-  "/vps/api/v1/project/{project-id}/floatingips/{fip-id}/approve":
+        - User/floating_ip
+  "/project/{project-id}/floatingips/{fip-id}/approve":
     post:
       description: |-
         Approves pending request made through API call to create a floating IP.
@@ -3843,8 +3879,8 @@ paths:
         - bearerAuth: []
       summary: Approve floatingIP request
       tags:
-        - floating_ip
-  "/vps/api/v1/project/{project-id}/floatingips/{fip-id}/disassociate":
+        - User/floating_ip
+  "/project/{project-id}/floatingips/{fip-id}/disassociate":
     post:
       description: Disassociates the specified floating ip from its attached resource.
       parameters:
@@ -3879,8 +3915,8 @@ paths:
         - bearerAuth: []
       summary: Disassociate floatingIP from device
       tags:
-        - floating_ip
-  "/vps/api/v1/project/{project-id}/floatingips/{fip-id}/reject":
+        - User/floating_ip
+  "/project/{project-id}/floatingips/{fip-id}/reject":
     post:
       description: |-
         Rejects pending request made through API call to create a floating IP.
@@ -3917,8 +3953,8 @@ paths:
         - bearerAuth: []
       summary: Reject floatingIP request
       tags:
-        - floating_ip
-  "/vps/api/v1/project/{project-id}/keypairs":
+        - User/floating_ip
+  "/project/{project-id}/keypairs":
     get:
       description: >-
         List all keypairs for a specific project id.
@@ -3966,7 +4002,7 @@ paths:
         - bearerAuth: []
       summary: List Keypairs
       tags:
-        - keypair
+        - User/keypair
     post:
       description: >
         Creates a keypair. A keypair is a ssh key that can be injected into a
@@ -4017,8 +4053,8 @@ paths:
         - bearerAuth: []
       summary: Create Keypair
       tags:
-        - keypair
-  "/vps/api/v1/project/{project-id}/keypairs/{keypair-id}":
+        - User/keypair
+  "/project/{project-id}/keypairs/{keypair-id}":
     delete:
       description: Deletes an existing keypair.
       parameters:
@@ -4053,7 +4089,7 @@ paths:
         - bearerAuth: []
       summary: Delete Keypair
       tags:
-        - keypair
+        - User/keypair
     get:
       description: Shows details for a keypair.
       parameters:
@@ -4092,7 +4128,7 @@ paths:
         - bearerAuth: []
       summary: Get Keypair
       tags:
-        - keypair
+        - User/keypair
     put:
       description: |-
         Updates the description about an existing keypair.
@@ -4142,8 +4178,8 @@ paths:
         - bearerAuth: []
       summary: Update Keypair
       tags:
-        - keypair
-  "/vps/api/v1/project/{project-id}/loadbalancers":
+        - User/keypair
+  "/project/{project-id}/loadbalancers":
     get:
       description: >-
         Lists all load balancers for the project. Search parameter is optional.
@@ -4201,7 +4237,7 @@ paths:
         - bearerAuth: []
       summary: List Load Balancers
       tags:
-        - loadbalancer
+        - User/loadbalancer
     post:
       description: >-
         Creates a load balancer.
@@ -4393,8 +4429,8 @@ paths:
         - bearerAuth: []
       summary: Create Load Balancer
       tags:
-        - loadbalancer
-  "/vps/api/v1/project/{project-id}/loadbalancers/{lb-id}":
+        - User/loadbalancer
+  "/project/{project-id}/loadbalancers/{lb-id}":
     delete:
       description: >-
         Deletes the specified load balancer.
@@ -4438,7 +4474,7 @@ paths:
         - bearerAuth: []
       summary: Delete Load Balancer
       tags:
-        - loadbalancer
+        - User/loadbalancer
     get:
       description: >-
         Gets details of a load balancer.
@@ -4487,7 +4523,7 @@ paths:
         - bearerAuth: []
       summary: Get Load Balancer
       tags:
-        - loadbalancer
+        - User/loadbalancer
     put:
       description: >-
         Updates name or description of a load balancer.
@@ -4560,8 +4596,8 @@ paths:
         - bearerAuth: []
       summary: Update Load Balancer
       tags:
-        - loadbalancer
-  "/vps/api/v1/project/{project-id}/loadbalancers/{lb-id}/floatingip":
+        - User/loadbalancer
+  "/project/{project-id}/loadbalancers/{lb-id}/floatingip":
     post:
       description: >-
         Associates a floating IP to the private vip of a load balancer.
@@ -4624,8 +4660,8 @@ paths:
         - bearerAuth: []
       summary: Associate FloatingIP to load balancer
       tags:
-        - loadbalancer
-  "/vps/api/v1/project/{project-id}/loadbalancers/{lb-id}/listeners":
+        - User/loadbalancer
+  "/project/{project-id}/loadbalancers/{lb-id}/listeners":
     get:
       description: >-
         Lists listeners associated with this load balancer.
@@ -4674,7 +4710,7 @@ paths:
         - bearerAuth: []
       summary: List Listeners
       tags:
-        - loadbalancer
+        - User/loadbalancer
     post:
       description: >-
         Creates listener under the specific load balancer.
@@ -4797,8 +4833,8 @@ paths:
         - bearerAuth: []
       summary: Create Listener in Load Balaner
       tags:
-        - loadbalancer
-  "/vps/api/v1/project/{project-id}/loadbalancers/{lb-id}/listeners/{lb-listener-id}":
+        - User/loadbalancer
+  "/project/{project-id}/loadbalancers/{lb-id}/listeners/{lb-listener-id}":
     delete:
       description: >-
         Deletes listener from a load balancer.
@@ -4849,7 +4885,7 @@ paths:
         - bearerAuth: []
       summary: Delete Listener in Load Balancer
       tags:
-        - loadbalancer
+        - User/loadbalancer
     get:
       description: >-
         Returns details about the listener with the given id.
@@ -4904,7 +4940,7 @@ paths:
         - bearerAuth: []
       summary: Get Listener
       tags:
-        - loadbalancer
+        - User/loadbalancer
     put:
       description: >-
         Updates attributes of existing listener identified by its UUID.
@@ -5005,8 +5041,8 @@ paths:
         - bearerAuth: []
       summary: Update Listener
       tags:
-        - loadbalancer
-  "/vps/api/v1/project/{project-id}/loadbalancers/{lb-id}/pools":
+        - User/loadbalancer
+  "/project/{project-id}/loadbalancers/{lb-id}/pools":
     get:
       description: >-
         Returns pools belonging to the load balancer.
@@ -5055,7 +5091,7 @@ paths:
         - bearerAuth: []
       summary: List Pools
       tags:
-        - loadbalancer
+        - User/loadbalancer
     post:
       description: >-
         Creates a pool under a specific load balancer.
@@ -5159,8 +5195,8 @@ paths:
         - bearerAuth: []
       summary: Create Pool in Load Balaner
       tags:
-        - loadbalancer
-  "/vps/api/v1/project/{project-id}/loadbalancers/{lb-id}/pools/{lb-pool-id}":
+        - User/loadbalancer
+  "/project/{project-id}/loadbalancers/{lb-id}/pools/{lb-pool-id}":
     delete:
       description: >-
         Deletes a pool from the associated load balancer.
@@ -5211,7 +5247,7 @@ paths:
         - bearerAuth: []
       summary: Delete Pool in Load Balancer
       tags:
-        - loadbalancer
+        - User/loadbalancer
     get:
       description: >-
         Returns detailed information about the specified pool.
@@ -5266,7 +5302,7 @@ paths:
         - bearerAuth: []
       summary: Get Pool
       tags:
-        - loadbalancer
+        - User/loadbalancer
     put:
       description: >-
         Updates attributes of an existing pool.
@@ -5347,8 +5383,8 @@ paths:
         - bearerAuth: []
       summary: Update Pool
       tags:
-        - loadbalancer
-  "/vps/api/v1/project/{project-id}/loadbalancers/{lb-id}/pools/{lb-pool-id}/members":
+        - User/loadbalancer
+  "/project/{project-id}/loadbalancers/{lb-id}/pools/{lb-pool-id}/members":
     post:
       description: >-
         This operation provisions a member and adds it to a pool.
@@ -5425,7 +5461,7 @@ paths:
         - bearerAuth: []
       summary: Create Member in Pool
       tags:
-        - loadbalancer
+        - User/loadbalancer
     put:
       description: >-
         Updates multiple members at once using JSON array input
@@ -5511,8 +5547,8 @@ paths:
         - bearerAuth: []
       summary: Batch Update Members in Pool
       tags:
-        - loadbalancer
-  "/vps/api/v1/project/{project-id}/loadbalancers/{lb-id}/pools/{lb-pool-id}/members/{lb-member-id}":
+        - User/loadbalancer
+  "/project/{project-id}/loadbalancers/{lb-id}/pools/{lb-pool-id}/members/{lb-member-id}":
     delete:
       description: >-
         Removes a specific member from a pool.
@@ -5569,8 +5605,8 @@ paths:
         - bearerAuth: []
       summary: Delete Member in Pool
       tags:
-        - loadbalancer
-  "/vps/api/v1/project/{project-id}/networks":
+        - User/loadbalancer
+  "/project/{project-id}/networks":
     get:
       description: >-
         List all networks that belong to current project.
@@ -5631,7 +5667,7 @@ paths:
         - bearerAuth: []
       summary: List Networks
       tags:
-        - network
+        - User/network
     post:
       description: >-
         Creates a network for specified project.
@@ -5685,8 +5721,8 @@ paths:
         - bearerAuth: []
       summary: Create Network (tenant_admin only)
       tags:
-        - network
-  "/vps/api/v1/project/{project-id}/networks/{network-id}":
+        - User/network
+  "/project/{project-id}/networks/{network-id}":
     delete:
       description: Deletes the requested network from system. Deletion will be blocked
         if there were active ports.
@@ -5722,7 +5758,7 @@ paths:
         - bearerAuth: []
       summary: Delete Network
       tags:
-        - network
+        - User/network
     get:
       description: Gets detailed information about a single network.
       parameters:
@@ -5761,7 +5797,7 @@ paths:
         - bearerAuth: []
       summary: Get Network
       tags:
-        - network
+        - User/network
     put:
       description: Updates the name or description of a given network.
       parameters:
@@ -5807,8 +5843,8 @@ paths:
         - bearerAuth: []
       summary: Update Network
       tags:
-        - network
-  "/vps/api/v1/project/{project-id}/networks/{network-id}/ports":
+        - User/network
+  "/project/{project-id}/networks/{network-id}/ports":
     get:
       description: Lists all ports belonging to the selected network.
       parameters:
@@ -5849,8 +5885,8 @@ paths:
         - bearerAuth: []
       summary: List Network Ports
       tags:
-        - network
-  "/vps/api/v1/project/{project-id}/quotas":
+        - User/network
+  "/project/{project-id}/quotas":
     get:
       description: Return quotas information about current project and usage that have
         been allocated currently.
@@ -5884,8 +5920,8 @@ paths:
         - bearerAuth: []
       summary: Get Project Quotas
       tags:
-        - quota
-  "/vps/api/v1/project/{project-id}/routers":
+        - User/quota
+  "/project/{project-id}/routers":
     get:
       description: List routers that belong to current project with optional filtering
         options.
@@ -5934,7 +5970,7 @@ paths:
         - bearerAuth: []
       summary: List Routers
       tags:
-        - router
+        - User/router
     post:
       description: |-
         Create new router under current project.
@@ -5979,8 +6015,8 @@ paths:
         - bearerAuth: []
       summary: Create Router (tenant_admin only)
       tags:
-        - router
-  "/vps/api/v1/project/{project-id}/routers/{router-id}":
+        - User/router
+  "/project/{project-id}/routers/{router-id}":
     delete:
       description: Deletes a router which is not in-use and not created with network.
       parameters:
@@ -6015,7 +6051,7 @@ paths:
         - bearerAuth: []
       summary: Delete Router
       tags:
-        - router
+        - User/router
     get:
       description: Retrieve detailed information of a router.
       parameters:
@@ -6054,7 +6090,7 @@ paths:
         - bearerAuth: []
       summary: Get Router
       tags:
-        - router
+        - User/router
     put:
       description: |-
         Updates the name or description of a router.
@@ -6105,8 +6141,8 @@ paths:
         - bearerAuth: []
       summary: Update Router
       tags:
-        - router
-  "/vps/api/v1/project/{project-id}/routers/{router-id}/action":
+        - User/router
+  "/project/{project-id}/routers/{router-id}/action":
     post:
       description: |-
         Do an action on the specified router.
@@ -6154,8 +6190,8 @@ paths:
         - bearerAuth: []
       summary: Do Action to Router
       tags:
-        - router
-  "/vps/api/v1/project/{project-id}/routers/{router-id}/networks":
+        - User/router
+  "/project/{project-id}/routers/{router-id}/networks":
     get:
       description: Lists associated networks from a router.
       parameters:
@@ -6194,8 +6230,8 @@ paths:
         - bearerAuth: []
       summary: List Associated Networks
       tags:
-        - router
-  "/vps/api/v1/project/{project-id}/routers/{router-id}/networks/{network-id}":
+        - User/router
+  "/project/{project-id}/routers/{router-id}/networks/{network-id}":
     delete:
       description: Disassociates a network from a router.
       parameters:
@@ -6236,7 +6272,7 @@ paths:
         - bearerAuth: []
       summary: Disassociate Network from Router
       tags:
-        - router
+        - User/router
     put:
       description: Associate a network to a router.
       parameters:
@@ -6277,8 +6313,8 @@ paths:
         - bearerAuth: []
       summary: Associate Network to Router
       tags:
-        - router
-  "/vps/api/v1/project/{project-id}/security_groups":
+        - User/router
+  "/project/{project-id}/security_groups":
     get:
       description: >-
         Return all security groups of a given project. Search parameter is
@@ -6339,7 +6375,7 @@ paths:
         - bearerAuth: []
       summary: List Security Groups
       tags:
-        - security_group
+        - User/security_group
     post:
       description: >-
         Creates a security group under current project.
@@ -6449,8 +6485,8 @@ paths:
         - bearerAuth: []
       summary: Create Security Group
       tags:
-        - security_group
-  "/vps/api/v1/project/{project-id}/security_groups/{sg-id}":
+        - User/security_group
+  "/project/{project-id}/security_groups/{sg-id}":
     delete:
       description: >-
         Deletes a specific security group identified by sg-id.
@@ -6495,7 +6531,7 @@ paths:
         - bearerAuth: []
       summary: Delete Security Group
       tags:
-        - security_group
+        - User/security_group
     get:
       description: >-
         Return detailed information about specific security group.
@@ -6544,7 +6580,7 @@ paths:
         - bearerAuth: []
       summary: Get Security Group
       tags:
-        - security_group
+        - User/security_group
     put:
       description: >-
         Updates the name or description of a specific security group.
@@ -6617,8 +6653,8 @@ paths:
         - bearerAuth: []
       summary: Update Security Group
       tags:
-        - security_group
-  "/vps/api/v1/project/{project-id}/security_groups/{sg-id}/rules":
+        - User/security_group
+  "/project/{project-id}/security_groups/{sg-id}/rules":
     post:
       description: >-
         Adds rule into an existing security group.
@@ -6715,8 +6751,8 @@ paths:
         - bearerAuth: []
       summary: Create Rule in Security Group
       tags:
-        - security_group
-  "/vps/api/v1/project/{project-id}/security_groups/{sg-id}/rules/{sg-rule-id}":
+        - User/security_group
+  "/project/{project-id}/security_groups/{sg-id}/rules/{sg-rule-id}":
     delete:
       description: >-
         Removes rule from an existing security group.
@@ -6771,8 +6807,8 @@ paths:
         - bearerAuth: []
       summary: Delete Rule in Security Group
       tags:
-        - security_group
-  "/vps/api/v1/project/{project-id}/servers":
+        - User/security_group
+  "/project/{project-id}/servers":
     get:
       description: >-
         List all servers of a given project. Search parameter is optional.
@@ -6843,7 +6879,7 @@ paths:
         - bearerAuth: []
       summary: List Servers
       tags:
-        - server
+        - User/server
     post:
       description: >-
         Create new server with specified parameters.
@@ -6938,7 +6974,7 @@ paths:
 
         &ensp;&ensp;"boot_script": "I2Nsb3VkLWNvbmZpZwpib290Y21kOgotIHNlZCAtaSAiMXMvJC8gJChob3N0bmFtZSB8IHRyICdcbicgJyAnKS8iIC9ldGMvaG9zdHM="
 
-        &ensp;&ensp;"system_volume_type": name or volume type to use for system volume.(optional)
+        &ensp;&ensp;"Admin/volume_type": name or volume type to use for system volume.(optional)
 
         }'
       parameters:
@@ -6978,8 +7014,8 @@ paths:
         - bearerAuth: []
       summary: Create Server
       tags:
-        - server
-  "/vps/api/v1/project/{project-id}/servers/{svr-id}":
+        - User/server
+  "/project/{project-id}/servers/{svr-id}":
     delete:
       description: >-
         Deletes a server.
@@ -7023,7 +7059,7 @@ paths:
         - bearerAuth: []
       summary: Delete Server
       tags:
-        - server
+        - User/server
     get:
       description: >-
         Return server detailed information of the given server id
@@ -7069,7 +7105,7 @@ paths:
         - bearerAuth: []
       summary: Get Server
       tags:
-        - server
+        - User/server
     put:
       description: >-
         Updates the name or description of an existing server.
@@ -7134,8 +7170,8 @@ paths:
         - bearerAuth: []
       summary: Update Server
       tags:
-        - server
-  "/vps/api/v1/project/{project-id}/servers/{svr-id}/action":
+        - User/server
+  "/project/{project-id}/servers/{svr-id}/action":
     post:
       description: >-
         Do an action on the specified server instance.
@@ -7213,8 +7249,8 @@ paths:
         - bearerAuth: []
       summary: Do Action to server
       tags:
-        - server
-  "/vps/api/v1/project/{project-id}/servers/{svr-id}/metric":
+        - User/server
+  "/project/{project-id}/servers/{svr-id}/metric":
     get:
       description: >-
         Get server metrics including CPU/Memory/DISK/NETWORK usage info over
@@ -7303,8 +7339,8 @@ paths:
         - bearerAuth: []
       summary: Get Server Metric
       tags:
-        - server
-  "/vps/api/v1/project/{project-id}/servers/{svr-id}/nics":
+        - User/server
+  "/project/{project-id}/servers/{svr-id}/nics":
     get:
       description: >-
         List all vNICs associated with this server.
@@ -7355,7 +7391,7 @@ paths:
         - bearerAuth: []
       summary: List Server's vNICs
       tags:
-        - server
+        - User/server
     post:
       description: >-
         Adds a new virtual NIC to the given server.
@@ -7431,8 +7467,8 @@ paths:
         - bearerAuth: []
       summary: Add a new vNIC to Server
       tags:
-        - server
-  "/vps/api/v1/project/{project-id}/servers/{svr-id}/nics/{nic-id}":
+        - User/server
+  "/project/{project-id}/servers/{svr-id}/nics/{nic-id}":
     delete:
       description: >-
         Removes a specific virtual NIC from its associated server.
@@ -7483,7 +7519,7 @@ paths:
         - bearerAuth: []
       summary: Remove a vNIC from Server
       tags:
-        - server
+        - User/server
     put:
       description: >-
         Updates ids of security groups assigned to the server’s existing vNICs.
@@ -7555,8 +7591,8 @@ paths:
         - bearerAuth: []
       summary: update server's vNIC
       tags:
-        - server
-  "/vps/api/v1/project/{project-id}/servers/{svr-id}/nics/{nic-id}/floatingip":
+        - User/server
+  "/project/{project-id}/servers/{svr-id}/nics/{nic-id}/floatingip":
     post:
       description: >-
         Associates a floating IP to a specific vNIC attached to a given server.
@@ -7625,8 +7661,8 @@ paths:
         - bearerAuth: []
       summary: Associate FloatingIP to a vNIC
       tags:
-        - server
-  "/vps/api/v1/project/{project-id}/servers/{svr-id}/vnc_url":
+        - User/server
+  "/project/{project-id}/servers/{svr-id}/vnc_url":
     get:
       description: >-
         Gets the URL used to connect to the VNC console for a server.
@@ -7675,8 +7711,8 @@ paths:
         - bearerAuth: []
       summary: Get VNC console URL (server's owner only)
       tags:
-        - server
-  "/vps/api/v1/project/{project-id}/servers/{svr-id}/volumes":
+        - User/server
+  "/project/{project-id}/servers/{svr-id}/volumes":
     get:
       description: >-
         List volume attachments for a server.
@@ -7725,8 +7761,8 @@ paths:
         - bearerAuth: []
       summary: List Server's volumes
       tags:
-        - server
-  "/vps/api/v1/project/{project-id}/servers/{svr-id}/volumes/{vol-id}":
+        - User/server
+  "/project/{project-id}/servers/{svr-id}/volumes/{vol-id}":
     delete:
       description: >-
         Detach a volume from a server.
@@ -7777,7 +7813,7 @@ paths:
         - bearerAuth: []
       summary: Detach a volume from a server
       tags:
-        - server
+        - User/server
     post:
       description: >-
         Attaches a volume to a server.
@@ -7830,8 +7866,8 @@ paths:
         - bearerAuth: []
       summary: Attach a Volume to Server
       tags:
-        - server
-  "/vps/api/v1/project/{project-id}/shares":
+        - User/server
+  "/project/{project-id}/shares":
     get:
       description: >-
         Lists all shares of a given project. Search parameter is optional.
@@ -7889,7 +7925,7 @@ paths:
         - bearerAuth: []
       summary: List Shares
       tags:
-        - share
+        - User/share
     post:
       description: >-
         Creates and returns information about newly created file share object.
@@ -7964,8 +8000,8 @@ paths:
         - bearerAuth: []
       summary: Create Share
       tags:
-        - share
-  "/vps/api/v1/project/{project-id}/shares/{share-id}":
+        - User/share
+  "/project/{project-id}/shares/{share-id}":
     delete:
       description: >-
         Deletes a share.
@@ -8012,7 +8048,7 @@ paths:
         - bearerAuth: []
       summary: Delete Share
       tags:
-        - share
+        - User/share
     get:
       description: >-
         Shows details for a share.
@@ -8061,7 +8097,7 @@ paths:
         - bearerAuth: []
       summary: Get Share
       tags:
-        - share
+        - User/share
     put:
       description: >-
         Updates name or description of a share.
@@ -8134,8 +8170,8 @@ paths:
         - bearerAuth: []
       summary: Update Share
       tags:
-        - share
-  "/vps/api/v1/project/{project-id}/shares/{share-id}/extend":
+        - User/share
+  "/project/{project-id}/shares/{share-id}/extend":
     post:
       description: >-
         Increases the size of a share.
@@ -8200,8 +8236,8 @@ paths:
         - bearerAuth: []
       summary: Extend Share
       tags:
-        - share
-  "/vps/api/v1/project/{project-id}/shares/{share-id}/rules":
+        - User/share
+  "/project/{project-id}/shares/{share-id}/rules":
     post:
       description: >-
         Creates rule that allows access from specific IP address and/or CIDRs.
@@ -8278,8 +8314,8 @@ paths:
         - bearerAuth: []
       summary: Create Rule in Share
       tags:
-        - share
-  "/vps/api/v1/project/{project-id}/shares/{share-id}/rules/{share-rule-id}":
+        - User/share
+  "/project/{project-id}/shares/{share-id}/rules/{share-rule-id}":
     delete:
       description: >-
         Removes existing rule allowing access from specific IP address and/or
@@ -8337,8 +8373,8 @@ paths:
         - bearerAuth: []
       summary: Delete Rule in Share
       tags:
-        - share
-  "/vps/api/v1/project/{project-id}/snapshots":
+        - User/share
+  "/project/{project-id}/snapshots":
     get:
       description: >-
         List all existing snapshots of this account or tenant.
@@ -8403,7 +8439,7 @@ paths:
         - bearerAuth: []
       summary: List Snapshots
       tags:
-        - snapshots
+        - User/snapshots
     post:
       description: >-
         Creates a snapshot from specified volume.
@@ -8467,8 +8503,8 @@ paths:
         - bearerAuth: []
       summary: Create Snapshot
       tags:
-        - snapshots
-  "/vps/api/v1/project/{project-id}/snapshots/{snapshot-id}":
+        - User/snapshots
+  "/project/{project-id}/snapshots/{snapshot-id}":
     delete:
       description: >-
         Deletes an existing snapshot resource.
@@ -8513,7 +8549,7 @@ paths:
         - bearerAuth: []
       summary: Delete Snapshot
       tags:
-        - snapshots
+        - User/snapshots
     get:
       description: >-
         Gets specific snapshot by its unique identifier.
@@ -8563,7 +8599,7 @@ paths:
         - bearerAuth: []
       summary: Get Snapshot
       tags:
-        - snapshots
+        - User/snapshots
     put:
       description: >-
         Updates the name or description of a snapshot using PUT method.
@@ -8631,8 +8667,8 @@ paths:
         - bearerAuth: []
       summary: Update Snapshot
       tags:
-        - snapshots
-  "/vps/api/v1/project/{project-id}/volume_types":
+        - User/snapshots
+  "/project/{project-id}/volume_types":
     get:
       description: List name of all available volume types in the system.
       parameters:
@@ -8665,8 +8701,8 @@ paths:
         - bearerAuth: []
       summary: List Name of Volume Types
       tags:
-        - volume_types
-  "/vps/api/v1/project/{project-id}/volume_types/{voltype-id}":
+        - User/volume_types
+  "/project/{project-id}/volume_types/{voltype-id}":
     get:
       description: Get volume type details.
       parameters:
@@ -8703,8 +8739,8 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Get Volume Type
       tags:
-        - volume_types
-  "/vps/api/v1/project/{project-id}/volume_types/details":
+        - User/volume_types
+  "/project/{project-id}/volume_types/details":
     get:
       description: List all available volume types in the system.
       parameters:
@@ -8737,8 +8773,8 @@ paths:
         - bearerAuth: []
       summary: List Volume Types
       tags:
-        - volume_types
-  "/vps/api/v1/project/{project-id}/volumes":
+        - User/volume_types
+  "/project/{project-id}/volumes":
     get:
       description: >-
         List all volumes in the current project. Search parameter is optional.
@@ -8806,7 +8842,7 @@ paths:
         - bearerAuth: []
       summary: List Volumes
       tags:
-        - volumes
+        - User/volumes
     post:
       description: >-
         Creates a new volume within your account.
@@ -8874,8 +8910,8 @@ paths:
         - bearerAuth: []
       summary: Create Volume
       tags:
-        - volumes
-  "/vps/api/v1/project/{project-id}/volumes/{vol-id}":
+        - User/volumes
+  "/project/{project-id}/volumes/{vol-id}":
     delete:
       description: >-
         Deletes a specific volume.
@@ -8920,7 +8956,7 @@ paths:
         - bearerAuth: []
       summary: Delete Volume
       tags:
-        - volumes
+        - User/volumes
     get:
       description: >-
         Returns detailed information about the requested volume resource.
@@ -8970,7 +9006,7 @@ paths:
         - bearerAuth: []
       summary: Get Volume
       tags:
-        - volumes
+        - User/volumes
     put:
       description: >-
         Updates the name or description of a specific volume.
@@ -9038,8 +9074,8 @@ paths:
         - bearerAuth: []
       summary: Update Volume
       tags:
-        - volumes
-  "/vps/api/v1/project/{project-id}/volumes/{vol-id}/action":
+        - User/volumes
+  "/project/{project-id}/volumes/{vol-id}/action":
     post:
       description: >-
         Perform some operation against this volume object such as attaching it
@@ -9105,8 +9141,8 @@ paths:
         - bearerAuth: []
       summary: Do action to Volume
       tags:
-        - volumes
-  "/vps/api/v1/project/{project-id}/volumes/{vol-id}/snapshot-schedules":
+        - User/volumes
+  "/project/{project-id}/volumes/{vol-id}/snapshot-schedules":
     get:
       description: List snapshot schedule for the specified volume.
       parameters:
@@ -9145,7 +9181,7 @@ paths:
         - bearerAuth: []
       summary: List Snapshot Schedules
       tags:
-        - snapshot-schedules
+        - User/snapshot-schedules
     post:
       description: Creates a snapshot schedule for the specified volume.
       parameters:
@@ -9197,8 +9233,8 @@ paths:
         - bearerAuth: []
       summary: Create Snapshot Schedule
       tags:
-        - snapshot-schedules
-  "/vps/api/v1/project/{project-id}/volumes/{vol-id}/snapshot-schedules/{snapshot-schedule-id}":
+        - User/snapshot-schedules
+  "/project/{project-id}/volumes/{vol-id}/snapshot-schedules/{snapshot-schedule-id}":
     delete:
       description: Deletes an existing snapshot schedule.
       parameters:
@@ -9239,7 +9275,7 @@ paths:
         - bearerAuth: []
       summary: Delete Snapshot Schedule
       tags:
-        - snapshot-schedules
+        - User/snapshot-schedules
     get:
       description: Gets specific snapshot schedule by its unique identifier.
       parameters:
@@ -9284,7 +9320,7 @@ paths:
         - bearerAuth: []
       summary: Get Snapshot Schedule
       tags:
-        - snapshot-schedules
+        - User/snapshot-schedules
     put:
       description: Updates a snapshot schedule.
       parameters:
@@ -9336,8 +9372,8 @@ paths:
         - bearerAuth: []
       summary: Update Snapshot Schedule
       tags:
-        - snapshot-schedules
-  /vps/api/v1/version:
+        - User/snapshot-schedules
+  /version:
     get:
       description: Show Virtual Platform Service's version number.
       responses:
@@ -9361,11 +9397,11 @@ paths:
                 $ref: "#/components/schemas/vpserr.ErrResponse"
       summary: Show Version
       tags:
-        - root_version
+        - User/root_version
 servers:
-  - url: https://api.ai-cloud.iic.nchc.org.tw
+  - url: https://api.ai-cloud.iic.nchc.org.tw/vps/api/v1
     description: AI-Cloud
-  - url: https://api.ai-trust.iic.nchc.org.tw
+  - url: https://api.ai-trust.iic.nchc.org.tw/vps/api/v1
     description: AI-Trust    
 components:
   requestBodies:
@@ -9773,7 +9809,7 @@ components:
           type: string
         status_reason:
           type: string
-        system_volume_type:
+        Admin/volume_type:
           type: string
         threshold_down:
           type: integer
@@ -10700,7 +10736,7 @@ components:
           type: string
         status_reason:
           type: string
-        system_volume_type:
+        Admin/volume_type:
           type: string
         updatedAt:
           type: string
@@ -11045,7 +11081,7 @@ components:
           minItems: 1
           type: array
           uniqueItems: true
-        system_volume_type:
+        Admin/volume_type:
           type: string
         threshold_down:
           maximum: 99
@@ -11639,7 +11675,7 @@ components:
           uniqueItems: true
         password:
           type: string
-        system_volume_type:
+        Admin/volume_type:
           type: string
         volumes:
           items:
