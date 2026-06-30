@@ -66,9 +66,120 @@ def spec_label(path: Path) -> str:
     return path.stem.upper()
 
 
-def build_specs_list(spec_paths: list[Path]) -> list[dict[str, str]]:
-    """Build the ordered [{file, label}, ...] tab list from spec paths."""
-    return [{"file": p.name, "label": spec_label(p)} for p in spec_paths]
+def _slugify(text: str) -> str:
+    """Lower-case, keep [a-z0-9], collapse everything else to single hyphens."""
+    out = []
+    prev_hyphen = False
+    for ch in text.lower():
+        if ("a" <= ch <= "z") or ("0" <= ch <= "9"):
+            out.append(ch)
+            prev_hyphen = False
+        elif not prev_hyphen:
+            out.append("-")
+            prev_hyphen = True
+    return "".join(out).strip("-")
+
+
+def server_id(description: str, url: str) -> str:
+    """Build a stable identifier for a server from its description + exact url.
+
+    Keying on description AND the exact (un-normalized) url avoids collisions
+    between servers that differ only by a trailing slash or only by their
+    description (both occur in the current swagger specs).
+    """
+    return _slugify(f"{description}--{url}") or "server"
+
+
+def parse_servers(spec_text: str) -> list[dict[str, str]]:
+    """Extract the top-level OpenAPI `servers` list from raw YAML text.
+
+    The build intentionally stays dependency-free (it embeds raw YAML strings
+    rather than parsing full documents), so this is a small, targeted parser
+    for just the top-level `servers:` block rather than a general YAML loader.
+
+    It recognizes the shape used by the project's specs:
+
+        servers:
+          - url: https://example/api/v1
+            description: AI-Cloud
+
+    Returns an ordered list of {id, label, url}. Specs that declare no
+    top-level `servers` key yield an empty list.
+    """
+    lines = spec_text.splitlines()
+    # Find the top-level `servers:` key (no leading indentation).
+    start = None
+    for i, line in enumerate(lines):
+        if re.match(r"^servers:\s*(#.*)?$", line):
+            start = i + 1
+            break
+    if start is None:
+        return []
+
+    servers: list[dict[str, str]] = []
+    current: dict[str, str] | None = None
+
+    def _unquote(value: str) -> str:
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+            return value[1:-1]
+        return value
+
+    for line in lines[start:]:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        # A non-indented, non-list line marks the next top-level key: stop.
+        if not line.startswith((" ", "\t")) and not line.lstrip().startswith("-"):
+            break
+
+        stripped = line.strip()
+        if stripped.startswith("-"):
+            # Start of a new server list item.
+            current = {}
+            servers.append(current)
+            stripped = stripped[1:].strip()
+            if not stripped:
+                continue
+        if current is None:
+            continue
+        if ":" in stripped:
+            key, _, value = stripped.partition(":")
+            current[key.strip()] = _unquote(value)
+
+    result: list[dict[str, str]] = []
+    for srv in servers:
+        url = srv.get("url", "")
+        if not url:
+            continue
+        description = srv.get("description", "")
+        result.append(
+            {
+                "id": server_id(description, url),
+                "label": description or url,
+                "url": url,
+            }
+        )
+    return result
+
+
+def build_specs_list(spec_paths: list[Path]) -> list[dict]:
+    """Build the ordered tab + server metadata list from spec paths.
+
+    Each entry is { file, label, servers: [{id, label, url}, ...] }. Specs that
+    declare no `servers` get an empty list rather than being omitted, so they
+    still appear as tabs and fall back to a per-spec credential context in the
+    frontend.
+    """
+    specs_list: list[dict] = []
+    for p in spec_paths:
+        specs_list.append(
+            {
+                "file": p.name,
+                "label": spec_label(p),
+                "servers": parse_servers(read_text(p)),
+            }
+        )
+    return specs_list
 
 
 def write_specs_json(spec_paths: list[Path] | None = None) -> Path:

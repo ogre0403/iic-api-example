@@ -14,29 +14,45 @@
     <!-- Tab buttons are generated at runtime by app.js (from the spec list),
          so adding/removing a swagger/*.yaml never requires editing this file. -->
 
-    <!-- Right-side credential inputs: values are persisted to localStorage and
-         automatically injected into Stoplight Try It fields on every render. -->
-    <div class="cred-group" id="cred-group">
-      <label class="cred-label" for="cred-token">Token</label>
-      <input
-        class="cred-input"
-        id="cred-token"
-        type="text"
-        placeholder="eyJhbGciOiJIU***V_adQssw5c"
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <label class="cred-label" for="cred-project-id">Project ID</label>
-      <input
-        class="cred-input"
-        id="cred-project-id"
-        type="text"
-        placeholder="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
-        autocomplete="off"
-        spellcheck="false"
-      />
-    </div>
+    <!-- Single settings icon: opens a modal for managing per-server
+         credentials. The saved Token / Project ID for the currently selected
+         server are auto-injected into Stoplight Try It fields on every render. -->
+    <button
+      class="cred-settings-btn"
+      id="cred-settings-btn"
+      type="button"
+      title="Server credentials"
+      aria-label="Server credentials"
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M19.14 12.94a7.49 7.49 0 0 0 .05-.94 7.49 7.49 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.3 7.3 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L2.74 8.8a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.62-.05.94 0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.42.34.68.22l2.39-.96c.49.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.26.12.54.02.68-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.05-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Z"/>
+      </svg>
+    </button>
   </nav>
+
+  <!-- Credential settings modal: lists the active spec's declared servers and
+       lets the user edit each server's Token / Project ID from one place. Edits
+       are staged in the inputs and only persisted to localStorage on Save. -->
+  <div class="cred-modal-overlay" id="cred-modal-overlay" hidden>
+    <div
+      class="cred-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cred-modal-title"
+    >
+      <div class="cred-modal-header">
+        <h2 class="cred-modal-title" id="cred-modal-title">Server Credentials</h2>
+        <button class="cred-modal-close" id="cred-modal-close" type="button" aria-label="Close">&times;</button>
+      </div>
+      <!-- One credential row per declared server is generated at runtime by
+           app.js; specs with no declared servers get a single fallback row. -->
+      <div class="cred-modal-body" id="cred-modal-body"></div>
+      <div class="cred-modal-footer">
+        <button class="cred-modal-btn cred-modal-cancel" id="cred-modal-cancel" type="button">Cancel</button>
+        <button class="cred-modal-btn cred-modal-save" id="cred-modal-save" type="button">Save</button>
+      </div>
+    </div>
+  </div>
 
   <div class="viewer">
     <elements-api

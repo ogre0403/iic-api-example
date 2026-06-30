@@ -1,18 +1,86 @@
 [
   {
     "file": "iam.yaml",
-    "label": "IAM"
+    "label": "IAM",
+    "servers": [
+      {
+        "id": "ai-cloud-https-api-central-iic-nchc-org-tw-iam-api-v1",
+        "label": "AI-Cloud",
+        "url": "https://api.central.iic.nchc.org.tw/iam/api/v1"
+      },
+      {
+        "id": "ai-trust-https-api-central-iic-nchc-org-tw-iam-api-v1",
+        "label": "AI-Trust",
+        "url": "https://api.central.iic.nchc.org.tw/iam/api/v1/"
+      },
+      {
+        "id": "https-api-trusted-cloud-nchc-org-tw-iam-api-v1",
+        "label": "高安控雲",
+        "url": "https://api.trusted-cloud.nchc.org.tw/iam/api/v1"
+      }
+    ]
   },
   {
     "file": "mcc.yaml",
-    "label": "MCC"
+    "label": "MCC",
+    "servers": [
+      {
+        "id": "ai-cloud-https-api-central-iic-nchc-org-tw-mcc-api-v1",
+        "label": "AI-Cloud",
+        "url": "https://api.central.iic.nchc.org.tw/mcc/api/v1"
+      },
+      {
+        "id": "ai-trust-https-api-central-iic-nchc-org-tw-mcc-api-v1",
+        "label": "AI-Trust",
+        "url": "https://api.central.iic.nchc.org.tw/mcc/api/v1/"
+      },
+      {
+        "id": "https-api-trusted-cloud-nchc-org-tw-mcc-api-v1",
+        "label": "高安控雲",
+        "url": "https://api.trusted-cloud.nchc.org.tw/mcc/api/v1"
+      }
+    ]
   },
   {
     "file": "vps.yaml",
-    "label": "VPS"
+    "label": "VPS",
+    "servers": [
+      {
+        "id": "ai-cloud-https-api-ai-cloud-iic-nchc-org-tw-vps-api-v1",
+        "label": "AI-Cloud",
+        "url": "https://api.ai-cloud.iic.nchc.org.tw/vps/api/v1"
+      },
+      {
+        "id": "ai-trust-https-api-ai-trust-iic-nchc-org-tw-vps-api-v1",
+        "label": "AI-Trust",
+        "url": "https://api.ai-trust.iic.nchc.org.tw/vps/api/v1"
+      },
+      {
+        "id": "https-api-trusted-cloud-nchc-org-tw-vps-api-v1",
+        "label": "高安控雲",
+        "url": "https://api.trusted-cloud.nchc.org.tw/vps/api/v1"
+      }
+    ]
   },
   {
     "file": "vrm.yaml",
-    "label": "VRM"
+    "label": "VRM",
+    "servers": [
+      {
+        "id": "ai-cloud-https-api-ai-cloud-iic-nchc-org-tw-vrm-api-v1",
+        "label": "AI-Cloud",
+        "url": "https://api.ai-cloud.iic.nchc.org.tw/vrm/api/v1"
+      },
+      {
+        "id": "ai-trust-https-api-ai-trust-iic-nchc-org-tw-vrm-api-v1",
+        "label": "AI-Trust",
+        "url": "https://api.ai-trust.iic.nchc.org.tw/vrm/api/v1"
+      },
+      {
+        "id": "https-api-trusted-cloud-nchc-org-tw-vrm-api-v1",
+        "label": "高安控雲",
+        "url": "https://api.trusted-cloud.nchc.org.tw/vrm/api/v1"
+      }
+    ]
   }
 ]

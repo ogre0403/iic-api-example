@@ -1,2 +1,6 @@
 /.env
 dist/
+.spectra/
+openspec/.vector-search.db*
+.spectra.yaml
+__pycache__

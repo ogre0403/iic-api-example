@@ -41,7 +41,7 @@
 		"ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
 		"ghcr.io/stu-bell/devcontainer-features/open-code:0": {},
 		"ghcr.io/cirolosapio/devcontainers-features/alpine-node:0.0.16": {
-			"globalPackages": "@openai/codex swagger2openapi"
+			"globalPackages": "@openai/codex swagger2openapi @fission-ai/openspec@latest"
 		},
 		// Access host Docker inside Devcontainer
 		// "ghcr.io/cirolosapio/devcontainers-features/alpine-docker-outside-of-docker:0": {},

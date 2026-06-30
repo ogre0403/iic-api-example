@@ -1,18 +1,104 @@
 // ---------------------------------------------------------------------------
-// Credentials: token & project-id stored in localStorage, auto-injected into
-// Stoplight Elements Try It fields on every render / spec switch.
+// Credentials: Token & Project ID are persisted PER SERVER ENVIRONMENT
+// (AI-Cloud / AI-Trust / 高安控雲), SHARED across every spec tab (IAM / MCC /
+// VPS / VRM). Set AI-Cloud's token once in any tab and it applies to AI-Cloud
+// in all tabs; AI-Trust keeps its own separate values.
+//
+// Because each spec declares the same environment under a slightly different
+// URL, credentials are keyed by the server LABEL (the environment name), which
+// is the identifier shared across specs — not by the per-spec server id.
+//
+// The values are auto-injected into Stoplight Elements Try It fields on every
+// render / spec switch / server switch.
 // ---------------------------------------------------------------------------
-const CRED_KEYS = { token: 'iic_cred_token', projectId: 'iic_cred_project_id' };
 
-const credentials = {
-  token:     localStorage.getItem(CRED_KEYS.token)     || '',
-  projectId: localStorage.getItem(CRED_KEYS.projectId) || '',
+// Legacy global keys (read-only fallback for users who saved credentials with
+// the original single-value model). We never write these again.
+const LEGACY_CRED_KEYS = { token: 'iic_cred_token', projectId: 'iic_cred_project_id' };
+
+function readJSONObject(key) {
+  try {
+    const v = JSON.parse(localStorage.getItem(key));
+    return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+// Per-environment credential storage, shared across all specs:
+//   iic_doc_credentials_v3 : { [envKey]: { token, projectId } }
+//   iic_active_server_v1   : { [specFile]: serverId }
+const CRED_STORE_KEY    = 'iic_doc_credentials_v3';
+const ACTIVE_SERVER_KEY = 'iic_active_server_v1';
+const _credStore     = readJSONObject(CRED_STORE_KEY);     // envKey -> {token, projectId}
+const _activeServers = readJSONObject(ACTIVE_SERVER_KEY);  // spec -> serverId
+
+// Synthetic server id / env key used for specs that declare no OpenAPI
+// `servers`; shared by all such specs.
+const FALLBACK_SERVER_ID = '__no_server__';
+
+// Read-only legacy values, shown only until a v3 record exists for the env.
+const legacyCred = {
+  token:     localStorage.getItem(LEGACY_CRED_KEYS.token)     || '',
+  projectId: localStorage.getItem(LEGACY_CRED_KEYS.projectId) || '',
 };
 
-// Save a single credential key and update the in-memory object.
-function saveCred(key, value) {
-  credentials[key] = value;
-  localStorage.setItem(CRED_KEYS[key], value);
+// The active spec/server selection (drives the Server selector + which env's
+// credentials are shown/injected).
+let activeSpecFile = null;
+let activeServerId = null;
+
+// Servers declared by a spec (from specs.json / __SPECS_LIST__ metadata).
+function getServersForSpec(file) {
+  const spec = SPECS.find((s) => s.file === file);
+  return (spec && Array.isArray(spec.servers)) ? spec.servers : [];
+}
+
+// The environment key for a (spec, serverId): the server's LABEL so the same
+// environment is shared across specs. Falls back to the url, then to the
+// no-server sentinel.
+function envKeyForServer(file, serverId) {
+  if (!serverId || serverId === FALLBACK_SERVER_ID) return FALLBACK_SERVER_ID;
+  const srv = getServersForSpec(file).find((s) => s.id === serverId);
+  if (!srv) return FALLBACK_SERVER_ID;
+  return srv.label || srv.url || FALLBACK_SERVER_ID;
+}
+
+// Resolve the active server id for a spec, validating any saved choice against
+// the current metadata. Falls back to the first valid server, or to the
+// per-spec fallback id when the spec declares no servers.
+function resolveServerId(file) {
+  const servers = getServersForSpec(file);
+  if (servers.length === 0) return FALLBACK_SERVER_ID;
+  const saved = _activeServers[file];
+  if (saved && servers.some((s) => s.id === saved)) return saved;
+  return servers[0].id;
+}
+
+// Make (file, serverId) the active selection and persist the choice (real
+// servers only — the fallback id is implicit and not worth storing).
+function setActiveServer(file, serverId) {
+  activeServerId = serverId;
+  if (serverId && serverId !== FALLBACK_SERVER_ID) {
+    _activeServers[file] = serverId;
+    localStorage.setItem(ACTIVE_SERVER_KEY, JSON.stringify(_activeServers));
+  }
+}
+
+// Credential record for a given environment key. While no v3 record exists for
+// the env we surface the legacy global values; once the user saves (creating a
+// record) we read v3 only.
+function credForEnvKey(envKey) {
+  if (Object.prototype.hasOwnProperty.call(_credStore, envKey)) {
+    const rec = _credStore[envKey] || {};
+    return { token: rec.token || '', projectId: rec.projectId || '' };
+  }
+  return { token: legacyCred.token, projectId: legacyCred.projectId };
+}
+
+// Credential record for the active environment (the active spec's selected server).
+function getCredContext() {
+  return credForEnvKey(envKeyForServer(activeSpecFile, activeServerId));
 }
 
 // Dispatch a native value-change so React (inside Stoplight Elements) picks it up.
@@ -97,59 +183,38 @@ function findInputsByLabel(root, keyword) {
   });
 }
 
-// Clear Try It fields matching the given label keyword (used when a credential is deleted).
-function clearTryItFields(keyword) {
-  const root = document.getElementById('api-viewer');
-  if (!root) return;
+// Set or clear all Try It inputs matching a label keyword to `value`.
+// When `value` is empty, fields are cleared so values saved for a previously
+// active server never linger after switching to a server with no saved value.
+function fillTryItFields(root, keyword, value) {
   const inputs = findInputsByLabel(root, keyword);
   inputs.forEach((inp) => {
-    if (inp.id === 'cred-project-id' || inp.id === 'cred-token') return;
-    if (!inp.value) return;
+    if (inp.value === value) return;             // already correct; don't fight the user
+    if (!value && !inp.value) return;            // nothing to clear
     if (inp instanceof HTMLTextAreaElement) {
-      setNativeTextareaValue(inp, '');
+      setNativeTextareaValue(inp, value);
     } else {
-      setNativeInputValue(inp, '');
+      setNativeInputValue(inp, value);
     }
   });
 }
 
-// Apply stored credentials into all visible Try It inputs.
+// Apply the ACTIVE server context's credentials into all visible Try It inputs,
+// clearing any field whose value is empty for the active server.
 function applyCredentialsToTryIt() {
   const root = document.getElementById('api-viewer');
   if (!root) return;
 
+  const cred = getCredContext();
+
   // --- Bearer token ---
   // Stoplight renders a "token" input (type=password or text) for bearerAuth.
   // It may appear with labels like "token", "bearerAuth", "Authorization", etc.
-  if (credentials.token) {
-    const tokenInputs = findInputsByLabel(root, 'token');
-    tokenInputs.forEach((inp) => {
-      // Avoid overwriting if user has already typed something different.
-      if (inp.value === credentials.token) return;
-      if (inp instanceof HTMLTextAreaElement) {
-        setNativeTextareaValue(inp, credentials.token);
-      } else {
-        setNativeInputValue(inp, credentials.token);
-      }
-    });
-  }
+  fillTryItFields(root, 'token', cred.token);
 
   // --- project-id ---
   // project-id may appear as a path param, query param or header.
-  // We fill any input whose identifier contains "project" (but NOT the topbar
-  // input itself, which has id="cred-project-id" and is outside the viewer).
-  if (credentials.projectId) {
-    const projInputs = findInputsByLabel(root, 'project');
-    projInputs.forEach((inp) => {
-      if (inp.id === 'cred-project-id') return; // skip our own topbar input
-      if (inp.value === credentials.projectId) return;
-      if (inp instanceof HTMLTextAreaElement) {
-        setNativeTextareaValue(inp, credentials.projectId);
-      } else {
-        setNativeInputValue(inp, credentials.projectId);
-      }
-    });
-  }
+  fillTryItFields(root, 'project', cred.projectId);
 }
 
 // ---------------------------------------------------------------------------
@@ -204,16 +269,17 @@ function buildTabs() {
   if (!bar) return;
   // Remove any pre-existing tab buttons (none in the new index.html, but be safe).
   bar.querySelectorAll('.tab-btn').forEach((b) => b.remove());
-  // Insert tabs before the cred-group so they sit right after the title.
-  const credGroup = bar.querySelector('#cred-group');
+  // Insert tabs before the settings button so they sit right after the title;
+  // the button's margin-left:auto keeps it pinned to the far right.
+  const settingsBtn = bar.querySelector('#cred-settings-btn');
   SPECS.forEach((spec, i) => {
     const btn = document.createElement('button');
     btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
     btn.textContent = spec.label || spec.file;
     btn.dataset.file = spec.file;
     btn.addEventListener('click', () => switchApi(spec.file, btn));
-    if (credGroup) {
-      bar.insertBefore(btn, credGroup);
+    if (settingsBtn) {
+      bar.insertBefore(btn, settingsBtn);
     } else {
       bar.appendChild(btn);
     }
@@ -430,13 +496,22 @@ function observeViewer() {
     observeViewer._t = setTimeout(() => {
       applyGrouping();
       expandGroupForHash();
+      // A re-render can change the rendered server control; re-resolve the
+      // active server and re-apply its credentials to keep them in sync.
+      syncCredentialsWithViewer();
     }, 50);
   });
   observer.observe(root, { childList: true, subtree: true });
   applyGrouping();
   expandGroupForHash();
-  // Apply saved credentials whenever the viewer re-renders.
-  applyCredentialsToTryIt();
+  // Keep the active server in sync when the user picks a server inside the viewer.
+  attachViewerServerSync();
+  // Force a Try It credential refresh just before the request is sent, so a
+  // fast Send after switching servers still uses the newly selected server.
+  attachTryItPreExecuteSync();
+  // Resolve the viewer-selected server, then apply its credentials whenever the
+  // viewer re-renders (navigation, spec switch, server-control mutation).
+  syncCredentialsWithViewer();
 }
 
 function switchApi(file, el, restoreHash) {
@@ -444,6 +519,9 @@ function switchApi(file, el, restoreHash) {
   el.classList.add('active');
   // Persist the selected tab so it survives a page refresh.
   localStorage.setItem('iic_active_tab', file);
+  // Switch the credential editing scope to this spec's active server, and
+  // refresh the top-bar Server / Token / Project controls accordingly.
+  activateSpecContext(file);
   // Load the collapse state for the new tab.
   loadCollapseState(file);
 
@@ -607,10 +685,20 @@ function persistHash() {
     const currentTab = localStorage.getItem('iic_active_tab') || DEFAULT_SPEC_FILE;
     localStorage.setItem('iic_hash_' + currentTab, h);
     setTimeout(fixRightColScroll, 400);
-    // Re-apply credentials whenever navigation lands on a new operation page.
-    setTimeout(applyCredentialsToTryIt, 800);
-    setTimeout(applyCredentialsToTryIt, 1500);
+    // Re-apply the active server's credentials whenever navigation lands on a
+    // new operation page; re-resolve the viewer server first so re-entering an
+    // operation reuses the matching server's credentials.
+    setTimeout(syncCredentialsWithViewer, 800);
+    setTimeout(syncCredentialsWithViewer, 1500);
   }
+}
+
+// Single combined synchronization pass: resolve the viewer-selected server into
+// the active context, then apply that server's credentials to visible Try It
+// fields. All render/navigation hooks funnel through here.
+function syncCredentialsWithViewer() {
+  syncActiveServerFromViewer();
+  applyCredentialsToTryIt();
 }
 
 // popstate fires on back/forward navigation
@@ -619,60 +707,288 @@ window.addEventListener('popstate', persistHash);
 // Poll every 300 ms to catch React Router pushState navigations
 setInterval(persistHash, 300);
 
-// Helper to format token with first 10 and last 10 characters visible, middle replaced with ***
-function formatToken(token) {
-  if (!token) return '';
-  if (token.length <= 20) return token;
-  return token.substring(0, 10) + '***' + token.substring(token.length - 10);
+// ---------------------------------------------------------------------------
+// Credential settings modal (per-server Token + Project ID)
+// ---------------------------------------------------------------------------
+// References to the modal controls, resolved once on load.
+const _modal = { overlay: null, body: null };
+
+// Switch the credential context to (file, its resolved active server). Called
+// whenever the active spec changes. The modal reads the active spec/server on
+// open, so there are no persistent topbar controls to refresh here.
+function activateSpecContext(file) {
+  activeSpecFile = file;
+  activeServerId = resolveServerId(file);
+}
+
+// Change the active server within the current spec: persist the choice and
+// re-apply credentials to any visible Try It fields. No-op if unchanged.
+function selectServer(serverId) {
+  if (!serverId || serverId === activeServerId) return;
+  setActiveServer(activeSpecFile, serverId);
+  applyCredentialsToTryIt();
+}
+
+// The credential rows the modal should display for the active spec: one per
+// declared server, in display order, or a single fallback row when the spec
+// declares no servers. Each row carries the server id, a display title/url and
+// the env key whose saved values it edits.
+function credentialRowsForActiveSpec() {
+  const servers = getServersForSpec(activeSpecFile);
+  if (servers.length === 0) {
+    return [{
+      serverId: FALLBACK_SERVER_ID,
+      envKey: FALLBACK_SERVER_ID,
+      title: 'Default (no declared server)',
+      url: '',
+    }];
+  }
+  return servers.map((srv) => ({
+    serverId: srv.id,
+    envKey: envKeyForServer(activeSpecFile, srv.id),
+    title: srv.label || srv.url,
+    url: srv.url || '',
+  }));
+}
+
+// Build the modal body: one editable Token / Project ID block per server row,
+// pre-filled from the saved (or legacy fallback) values. The row matching the
+// currently active server is marked so the user can tell which one Try It uses.
+// Inputs hold the staged draft; nothing is persisted until Save.
+function buildModalRows() {
+  const body = _modal.body;
+  if (!body) return;
+  body.innerHTML = '';
+  credentialRowsForActiveSpec().forEach((row) => {
+    const cred = credForEnvKey(row.envKey);
+
+    const rowEl = document.createElement('div');
+    rowEl.className = 'cred-row' + (row.serverId === activeServerId ? ' active' : '');
+    rowEl.dataset.envKey = row.envKey;
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'cred-row-title';
+    titleEl.textContent = row.title;
+    rowEl.appendChild(titleEl);
+
+    if (row.url) {
+      const urlEl = document.createElement('div');
+      urlEl.className = 'cred-row-url';
+      urlEl.textContent = row.url;
+      rowEl.appendChild(urlEl);
+    }
+
+    rowEl.appendChild(buildModalField('Token', 'token', cred.token, 'eyJhbGciOiJIU***V_adQssw5c'));
+    rowEl.appendChild(buildModalField('Project ID', 'projectId', cred.projectId, 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'));
+
+    body.appendChild(rowEl);
+  });
+}
+
+// Build a single labelled credential field for the modal. `field` is the
+// credential key ('token' | 'projectId') stored in dataset for save time.
+function buildModalField(labelText, field, value, placeholder) {
+  const wrap = document.createElement('div');
+  wrap.className = 'cred-field';
+
+  const label = document.createElement('label');
+  label.className = 'cred-field-label';
+  label.textContent = labelText;
+
+  const input = document.createElement('input');
+  input.className = 'cred-field-input';
+  input.type = 'text';
+  input.value = value || '';
+  input.placeholder = placeholder;
+  input.autocomplete = 'off';
+  input.spellcheck = false;
+  input.dataset.field = field;
+
+  label.appendChild(input);
+  wrap.appendChild(label);
+  return wrap;
+}
+
+// Open the modal, building fresh rows from the current persisted values so the
+// draft always starts from the saved state.
+function openCredModal() {
+  if (!_modal.overlay) return;
+  // Make sure the active server reflects the viewer before we render rows.
+  syncActiveServerFromViewer();
+  buildModalRows();
+  _modal.overlay.hidden = false;
+}
+
+// Close the modal without persisting (Cancel / overlay / Escape). Draft edits
+// live only in the inputs, so discarding is just hiding the modal.
+function closeCredModal() {
+  if (!_modal.overlay) return;
+  _modal.overlay.hidden = true;
+}
+
+// Persist the staged modal edits back to the existing credential store in one
+// batch, writing each server row to its env key independently. Does NOT change
+// the active viewer server. Refreshes visible Try It fields when the currently
+// active server's saved values changed.
+function saveCredModal() {
+  const body = _modal.body;
+  if (!body) { closeCredModal(); return; }
+
+  const activeEnvKey = envKeyForServer(activeSpecFile, activeServerId);
+  let activeChanged = false;
+
+  body.querySelectorAll('.cred-row').forEach((rowEl) => {
+    const envKey = rowEl.dataset.envKey;
+    if (!envKey) return;
+    const before = credForEnvKey(envKey);
+    const next = { token: before.token, projectId: before.projectId };
+    rowEl.querySelectorAll('input[data-field]').forEach((inp) => {
+      next[inp.dataset.field] = inp.value;
+    });
+    if (next.token === before.token && next.projectId === before.projectId) return;
+    _credStore[envKey] = next;
+    if (envKey === activeEnvKey) activeChanged = true;
+  });
+
+  localStorage.setItem(CRED_STORE_KEY, JSON.stringify(_credStore));
+  closeCredModal();
+
+  // Only re-inject when the server the viewer is currently using was edited.
+  if (activeChanged) applyCredentialsToTryIt();
+}
+
+// Map an arbitrary rendered text blob to one of the active spec's servers.
+// Prefers an exact URL match (longest first to disambiguate trailing-slash
+// variants), then an exact label match, then a substring fallback. Returns the
+// server object or null. Centralized so the matching rules live in one place.
+function matchServerFromText(text) {
+  const servers = getServersForSpec(activeSpecFile);
+  if (!text || servers.length === 0) return null;
+  const t = text.trim();
+  const byUrlLen = servers.slice().sort((a, b) => (b.url || '').length - (a.url || '').length);
+  for (const s of byUrlLen) if (s.url && t === s.url) return s;
+  for (const s of servers)  if (s.label && t === s.label) return s;
+  for (const s of byUrlLen) if (s.url && t.includes(s.url)) return s;
+  for (const s of servers)  if (s.label && t.includes(s.label)) return s;
+  return null;
+}
+
+// Resolve the server currently selected inside the Stoplight viewer and make it
+// the active credential context. This is the single synchronization path used
+// by viewer interactions, re-render hooks and the pre-execution safeguard.
+//
+// Stoplight renders the chosen server in a "Server:" selector control. We read
+// the currently displayed selection text and match it against spec metadata.
+// When detection fails we keep the previously resolved active server (safe
+// fallback), so a flaky DOM read never clears a valid context.
+function syncActiveServerFromViewer() {
+  const root = document.getElementById('api-viewer');
+  if (!root) return;
+  const servers = getServersForSpec(activeSpecFile);
+  if (servers.length === 0) return;          // fallback context; nothing to sync
+
+  // The server selector renders as a button/control whose text contains the
+  // currently selected server's label or URL. Scan small candidate nodes and
+  // take the first that maps to a known server.
+  const candidates = deepQueryAll(root, 'button, [role="button"], [aria-haspopup], summary');
+  for (const el of candidates) {
+    const text = (el.textContent || '').trim();
+    if (!text || text.length > 200) continue;
+    // Limit to controls that look like the server selector to avoid matching
+    // an unrelated URL elsewhere on the page.
+    if (!/server/i.test(text) && !matchServerFromText(text)) continue;
+    const match = matchServerFromText(text);
+    if (match) {
+      selectServer(match.id);
+      return;
+    }
+  }
+}
+
+// Bidirectional sync with Stoplight's own server selector: when the user picks
+// a server from inside the rendered viewer, reflect it into the credential
+// context. The (fragile) DOM addressing is isolated here; we match by metadata
+// label/url rather than a brittle CSS selector, and never throw.
+function attachViewerServerSync() {
+  const root = document.getElementById('api-viewer');
+  if (!root || root._serverSyncAttached) return;
+  root._serverSyncAttached = true;
+  root.addEventListener('click', (ev) => {
+    let el = ev.target;
+    // Walk up only a couple of levels from the clicked leaf so we match a
+    // single server menu option, not the whole panel.
+    for (let depth = 0; el && el !== root && depth < 3; depth++, el = el.parentElement) {
+      const text = el.textContent || '';
+      if (text.length > 200) break;           // too large to be a single option
+      const match = matchServerFromText(text);
+      if (match) {
+        // Update the active context in the same interaction cycle so a fast
+        // Try It immediately afterwards uses the newly selected server.
+        selectServer(match.id);
+        return;
+      }
+    }
+  }, true);
+}
+
+// Pre-execution safeguard: just before a Try It request is sent, force one last
+// active-server resolution and credential re-apply. This closes the race where
+// Stoplight updates its selected server slightly later than the user click that
+// opens or sends the request, which could otherwise send stale credentials.
+//
+// The handler runs in the CAPTURE phase so credentials are injected before
+// Stoplight's own click handler reads the form and dispatches the request.
+function attachTryItPreExecuteSync() {
+  const root = document.getElementById('api-viewer');
+  if (!root || root._tryItSyncAttached) return;
+  root._tryItSyncAttached = true;
+  root.addEventListener('click', (ev) => {
+    let el = ev.target;
+    for (let depth = 0; el && el !== root && depth < 4; depth++, el = el.parentElement) {
+      const text = (el.textContent || '').trim().toLowerCase();
+      // The Send button is a short control labelled "Send"/"Send Request".
+      if ((el.tagName === 'BUTTON' || el.getAttribute && el.getAttribute('role') === 'button')
+          && text.length < 40 && /\bsend\b/.test(text)) {
+        syncCredentialsWithViewer();
+        return;
+      }
+    }
+  }, true);
 }
 
 // Initial wiring once the page is ready.
 window.addEventListener('load', async () => {
-  // --- Wire up credential inputs in the topbar (must happen before any early return) ---
-  (function initCredentialInputs() {
-    const tokenInput     = document.getElementById('cred-token');
-    const projectIdInput = document.getElementById('cred-project-id');
+  // --- Wire up the credential settings modal (must happen before any early return) ---
+  (function initCredentialModal() {
+    _modal.overlay = document.getElementById('cred-modal-overlay');
+    _modal.body    = document.getElementById('cred-modal-body');
 
-    if (tokenInput) {
-      // Restore persisted value into the topbar input with formatted display.
-      tokenInput.value = formatToken(credentials.token);
-      
-      // Show full token while focused.
-      tokenInput.addEventListener('focus', () => {
-        tokenInput.value = credentials.token;
-      });
-      
-      // Show formatted token when blurred.
-      tokenInput.addEventListener('blur',  () => {
-        tokenInput.value = formatToken(credentials.token);
-      });
+    const openBtn   = document.getElementById('cred-settings-btn');
+    const closeBtn  = document.getElementById('cred-modal-close');
+    const cancelBtn = document.getElementById('cred-modal-cancel');
+    const saveBtn   = document.getElementById('cred-modal-save');
 
-      tokenInput.addEventListener('input', () => {
-        const val = tokenInput.value;
-        saveCred('token', val);
-        if (val) {
-          applyCredentialsToTryIt();
-        } else {
-          clearTryItFields('token');
-        }
+    if (openBtn)   openBtn.addEventListener('click', openCredModal);
+    if (closeBtn)  closeBtn.addEventListener('click', closeCredModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeCredModal);
+    if (saveBtn)   saveBtn.addEventListener('click', saveCredModal);
+
+    // Click on the dimmed overlay (outside the dialog) closes without saving.
+    if (_modal.overlay) {
+      _modal.overlay.addEventListener('click', (ev) => {
+        if (ev.target === _modal.overlay) closeCredModal();
       });
     }
-
-    if (projectIdInput) {
-      projectIdInput.value = credentials.projectId;
-      projectIdInput.addEventListener('input', () => {
-        const val = projectIdInput.value;
-        saveCred('projectId', val);
-        if (val) {
-          applyCredentialsToTryIt();
-        } else {
-          clearTryItFields('project');
-        }
-      });
-    }
+    // Escape closes the modal without saving.
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && _modal.overlay && !_modal.overlay.hidden) {
+        closeCredModal();
+      }
+    });
   })();
   // Resolve the spec list (injected list, specs.json, or fallback) first,
-  // then build the tab bar from it.
+  // then build the tab bar from it. The credential context is initialized by
+  // switchApi() -> activateSpecContext() once the active spec is known.
   await resolveSpecs();
   buildTabs();
 

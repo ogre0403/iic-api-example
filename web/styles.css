@@ -319,53 +319,197 @@ elements-api .sl-popover,
   max-width: 600px !important;
 }
 
-/* ---- Right-side credential inputs in the topbar ---- */
+/* ---- Right-side credential settings icon in the topbar ---- */
 
-/* Push the cred group to the far right; tabs are left-aligned naturally. */
-.cred-group {
+/* Push the settings icon to the far right; tabs are left-aligned naturally. */
+.cred-settings-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
   margin-left: auto;
   flex-shrink: 0;
-}
-
-.cred-label {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
   color: #94a3b8;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  user-select: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
 
-.cred-input {
+.cred-settings-btn:hover {
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+/* ---- Credential settings modal ---- */
+
+.cred-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.cred-modal-overlay[hidden] {
+  display: none;
+}
+
+.cred-modal {
+  background: #ffffff;
+  color: #1e293b;
+  width: min(640px, calc(100vw - 40px));
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
+  overflow: hidden;
+}
+
+.cred-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cred-modal-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cred-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.cred-modal-close:hover {
+  color: #1e293b;
+}
+
+.cred-modal-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* One block per server, with its name and the two credential inputs. */
+.cred-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cred-row-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  word-break: break-all;
+}
+
+/* Highlight the row for the server currently active in the viewer. */
+.cred-row.active .cred-row-title::after {
+  content: 'current';
+  margin-left: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #2563eb;
+  background: #dbeafe;
+  border-radius: 4px;
+  padding: 2px 6px;
+  vertical-align: middle;
+}
+
+.cred-row-url {
+  font-size: 11px;
+  color: #94a3b8;
+  word-break: break-all;
+}
+
+.cred-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cred-field-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.cred-field-input {
   background: #ffffff;
   color: #1e293b;
   border: 1px solid #cbd5e1;
   border-radius: 5px;
-  padding: 4px 8px;
-  font-size: 12px;
-  height: 28px;
+  padding: 6px 10px;
+  font-size: 13px;
+  width: 100%;
   outline: none;
   transition: border-color 0.15s;
 }
 
-/* Token input: wider since tokens are long and formatted */
-#cred-token {
-  width: 220px;
-}
-
-/* Project-id input */
-#cred-project-id {
-  width: 250px;
-}
-
-.cred-input::placeholder {
+.cred-field-input::placeholder {
   color: #94a3b8;
 }
 
-.cred-input:focus {
+.cred-field-input:focus {
   border-color: #2563eb;
+}
+
+.cred-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cred-modal-btn {
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.cred-modal-cancel {
+  background: #ffffff;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.cred-modal-cancel:hover {
+  background: #f1f5f9;
+}
+
+.cred-modal-save {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.cred-modal-save:hover {
+  background: #1d4ed8;
 }
 
 /* ---- Hide "Powered by Stoplight" in the Stoplight Elements sidebar ---- */
