@@ -56,8 +56,20 @@ body {
 elements-api {
   display: block;
   height: 100%;
-  zoom: 1.2;
 }
+
+/* ---- Scale up the Stoplight UI text without using zoom or transform ----
+   Stoplight Elements uses fixed Tailwind utility classes (sl-text-xs,
+   sl-text-sm, sl-text-base, sl-text-lg, sl-text-xl, sl-text-2xl …).
+   Overriding them here gives a ~20 % size boost without touching the
+   coordinate system, so Floating UI dropdowns stay correctly positioned. */
+elements-api .sl-text-xs   { font-size: 0.77rem  !important; line-height: 1.15rem !important; }
+elements-api .sl-text-sm   { font-size: 0.88rem  !important; line-height: 1.4rem  !important; }
+elements-api .sl-text-base { font-size: 1.0rem   !important; line-height: 1.65rem !important; }
+elements-api .sl-text-lg   { font-size: 1.15rem  !important; line-height: 1.8rem  !important; }
+elements-api .sl-text-xl   { font-size: 1.32rem  !important; line-height: 1.85rem !important; }
+elements-api .sl-text-2xl  { font-size: 1.54rem  !important; line-height: 2.0rem  !important; }
+elements-api .sl-text-3xl  { font-size: 1.98rem  !important; line-height: 2.35rem !important; }
 
 /* ---- Make the right-side content panel fill the available space ----
    Stoplight's SidebarLayout renders the content like this:
