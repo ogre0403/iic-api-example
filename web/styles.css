@@ -367,3 +367,10 @@ elements-api .sl-popover,
 .cred-input:focus {
   border-color: #2563eb;
 }
+
+/* ---- Hide "Powered by Stoplight" in the Stoplight Elements sidebar ---- */
+elements-api .sl-powered-by,
+elements-api [class*="powered-by"],
+elements-api a[href*="stoplight.io"] {
+  display: none !important;
+}
