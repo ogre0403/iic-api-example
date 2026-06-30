@@ -1543,19 +1543,19 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            "application/json":
               schema:
                 $ref: "#/components/schemas/user.GetProjectInfoOutput"
         "403":
           description: Forbidden
           content:
-            "*/*":
+            "application/json":
               schema:
                 $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
         "500":
           description: Internal Server Error
           content:
-            "*/*":
+            "application/json":
               schema:
                 $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
       summary: 取得 project 資訊
@@ -1887,19 +1887,19 @@ paths:
         "403":
           description: Forbidden
           content:
-            "*/*":
+            "application/json":
               schema:
                 $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
         "404":
           description: Repository not found
           content:
-            "*/*":
+            "application/json":
               schema:
                 $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
         "500":
           description: Internal server error
           content:
-            "*/*":
+            "application/json":
               schema:
                 $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
       summary: 棄用指定的 repository
@@ -2465,25 +2465,25 @@ paths:
         "400":
           description: Bad Request
           content:
-            "*/*":
+            "application/json":
               schema:
                 $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
         "403":
           description: Forbidden
           content:
-            "*/*":
+            "application/json":
               schema:
                 $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
         "404":
           description: Not Found
           content:
-            "*/*":
+            "application/json":
               schema:
                 $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
         "500":
           description: Internal Server Error
           content:
-            "*/*":
+            "application/json":
               schema:
                 $ref: "#/components/schemas/VirtualRegistryManagement_utility.ErrResponse"
       summary: 下載 Image
@@ -3072,7 +3072,9 @@ servers:
   - url: https://api.ai-cloud.iic.nchc.org.tw/vrm/api/v1
     description: AI-Cloud
   - url: https://api.ai-trust.iic.nchc.org.tw/vrm/api/v1
-    description: AI-Trust    
+    description: AI-Trust
+  - url: https://api.trusted-cloud.nchc.org.tw/vrm/api/v1
+    description: 高安控雲
 components:
   securitySchemes:
     bearerAuth:

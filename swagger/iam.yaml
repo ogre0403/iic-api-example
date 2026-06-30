@@ -11,7 +11,11 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 servers: 
   - url: https://api.central.iic.nchc.org.tw/iam/api/v1
-    description: 晶創雲
+    description: AI-Cloud
+  - url: https://api.central.iic.nchc.org.tw/iam/api/v1/
+    description: AI-Trust
+  - url: https://api.trusted-cloud.nchc.org.tw/iam/api/v1
+    description: 高安控雲
 tags:
   - name: "User/Login"
     description: "Login API by User"

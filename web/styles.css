@@ -197,6 +197,14 @@ elements-api .sl-elements-api .HttpOperation .sl-code-viewer__scroller code {
   word-break: break-all !important;
 }
 
+/* Wrap long lines in the Request Sample code viewer so content fits without scrolling */
+elements-api .sl-elements-api .HttpOperation .sl-code-highlight,
+elements-api .sl-elements-api .HttpOperation .sl-code-highlight .sl-flex,
+elements-api .sl-elements-api .HttpOperation .sl-code-highlight .sl-break-all {
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+}
+
 /* Hide the "Response Example" panel (last child in the right-column stack) */
 elements-api .sl-elements-api .HttpOperation > div.sl-flex:not(.sl-flex-col) > .sl-relative .sl-stack--vertical > .sl-panel:last-child {
   display: none !important;
@@ -272,6 +280,45 @@ elements-api .sl-elements-api .HttpOperation > div:first-child .sl-truncate {
   word-break: break-all !important;
 }
 
+/* ---- Prevent Server URL truncation in the SERVERS dropdown ----
+   By default, Stoplight's Mosaic MenuItem restricts the width of the title/description
+   wrapper to 250px and line-clamps/truncates the description (the URL).
+   We remove these limits so the full URL is displayed and can wrap if necessary. */
+
+/* Title/description wrapper in menu item: remove the 250px max-width cap */
+elements-api .sl-menu-item__title-wrapper,
+.sl-menu-item__title-wrapper {
+  max-width: none !important;
+}
+
+/* Menu item description (which holds the server URL): wrap instead of clamping/truncating */
+elements-api .sl-menu-item__description,
+.sl-menu-item__description {
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  display: block !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  word-break: break-all !important;
+}
+
+/* Overwrite any text truncation inside menu items (e.g. sl-truncate, sl-overflow-ellipsis) */
+elements-api .sl-menu-item .sl-truncate,
+.sl-menu-item .sl-truncate,
+elements-api .sl-menu-item .sl-overflow-ellipsis,
+.sl-menu-item .sl-overflow-ellipsis {
+  overflow: visible !important;
+  text-overflow: unset !important;
+  white-space: normal !important;
+  word-break: break-all !important;
+}
+
+/* Allow the dropdown popover itself to be wider to accommodate longer URLs */
+elements-api .sl-popover,
+.sl-popover {
+  max-width: 600px !important;
+}
+
 /* ---- Right-side credential inputs in the topbar ---- */
 
 /* Push the cred group to the far right; tabs are left-aligned naturally. */
@@ -303,14 +350,14 @@ elements-api .sl-elements-api .HttpOperation > div:first-child .sl-truncate {
   transition: border-color 0.15s;
 }
 
-/* Token input: wider since tokens are long */
+/* Token input: wider since tokens are long and formatted */
 #cred-token {
-  width: 180px;
+  width: 220px;
 }
 
 /* Project-id input */
 #cred-project-id {
-  width: 140px;
+  width: 250px;
 }
 
 .cred-input::placeholder {
@@ -319,9 +366,4 @@ elements-api .sl-elements-api .HttpOperation > div:first-child .sl-truncate {
 
 .cred-input:focus {
   border-color: #2563eb;
-}
-
-/* Show the token as plain text when the input is focused (password → text) */
-.cred-input[type="password"]:focus {
-  letter-spacing: 0;
 }

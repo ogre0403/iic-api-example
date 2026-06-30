@@ -97,6 +97,22 @@ function findInputsByLabel(root, keyword) {
   });
 }
 
+// Clear Try It fields matching the given label keyword (used when a credential is deleted).
+function clearTryItFields(keyword) {
+  const root = document.getElementById('api-viewer');
+  if (!root) return;
+  const inputs = findInputsByLabel(root, keyword);
+  inputs.forEach((inp) => {
+    if (inp.id === 'cred-project-id' || inp.id === 'cred-token') return;
+    if (!inp.value) return;
+    if (inp instanceof HTMLTextAreaElement) {
+      setNativeTextareaValue(inp, '');
+    } else {
+      setNativeInputValue(inp, '');
+    }
+  });
+}
+
 // Apply stored credentials into all visible Try It inputs.
 function applyCredentialsToTryIt() {
   const root = document.getElementById('api-viewer');
@@ -296,31 +312,24 @@ function applyGrouping() {
   });
   if (tagItems.length === 0) return;
 
-  // If we've already injected our headers and nothing structurally changed, skip.
-  // (Re-running is safe but we avoid needless DOM churn.)
-  const alreadyGrouped = container.querySelector('.group-l1-header');
-  if (alreadyGrouped && container.querySelectorAll('.group-l1-header').length >= 1) {
-    // Still ensure labels/indent are correct (Stoplight may re-render rows).
-    decorateChildren(tagItems);
-    return;
-  }
-
+  // Ensure we label and indent all second-level tag items properly.
   decorateChildren(tagItems);
 
-  // Insert L1 group headers before the first item of each group.
+  // Ensure L1 group headers exist and are positioned immediately before the first item of each group.
   ['User', 'Admin'].forEach((groupName) => {
     const first = tagItems.find(
       (el) => (el.getAttribute('title') || '').split('/')[0] === groupName
     );
     if (!first) return;
-    if (
-      first.previousElementSibling &&
-      first.previousElementSibling.classList.contains('group-l1-header')
-    ) {
-      return; // header already present
+
+    let header = container.querySelector(`.group-l1-header[data-l1group="${groupName}"]`);
+    if (!header) {
+      header = buildHeader(groupName);
     }
-    const header = buildHeader(groupName);
-    container.insertBefore(header, first);
+
+    if (first.previousElementSibling !== header) {
+      container.insertBefore(header, first);
+    }
   });
 
   applyCollapseState(container);
@@ -610,6 +619,13 @@ window.addEventListener('popstate', persistHash);
 // Poll every 300 ms to catch React Router pushState navigations
 setInterval(persistHash, 300);
 
+// Helper to format token with first 10 and last 10 characters visible, middle replaced with ***
+function formatToken(token) {
+  if (!token) return '';
+  if (token.length <= 20) return token;
+  return token.substring(0, 10) + '***' + token.substring(token.length - 10);
+}
+
 // Initial wiring once the page is ready.
 window.addEventListener('load', async () => {
   // --- Wire up credential inputs in the topbar (must happen before any early return) ---
@@ -618,22 +634,40 @@ window.addEventListener('load', async () => {
     const projectIdInput = document.getElementById('cred-project-id');
 
     if (tokenInput) {
-      // Restore persisted value into the topbar input.
-      tokenInput.value = credentials.token;
-      // Show token as plain text while focused.
-      tokenInput.addEventListener('focus', () => { tokenInput.type = 'text'; });
-      tokenInput.addEventListener('blur',  () => { tokenInput.type = 'password'; });
+      // Restore persisted value into the topbar input with formatted display.
+      tokenInput.value = formatToken(credentials.token);
+      
+      // Show full token while focused.
+      tokenInput.addEventListener('focus', () => {
+        tokenInput.value = credentials.token;
+      });
+      
+      // Show formatted token when blurred.
+      tokenInput.addEventListener('blur',  () => {
+        tokenInput.value = formatToken(credentials.token);
+      });
+
       tokenInput.addEventListener('input', () => {
-        saveCred('token', tokenInput.value.trim());
-        applyCredentialsToTryIt();
+        const val = tokenInput.value;
+        saveCred('token', val);
+        if (val) {
+          applyCredentialsToTryIt();
+        } else {
+          clearTryItFields('token');
+        }
       });
     }
 
     if (projectIdInput) {
       projectIdInput.value = credentials.projectId;
       projectIdInput.addEventListener('input', () => {
-        saveCred('projectId', projectIdInput.value.trim());
-        applyCredentialsToTryIt();
+        const val = projectIdInput.value;
+        saveCred('projectId', val);
+        if (val) {
+          applyCredentialsToTryIt();
+        } else {
+          clearTryItFields('project');
+        }
       });
     }
   })();

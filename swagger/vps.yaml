@@ -9402,7 +9402,9 @@ servers:
   - url: https://api.ai-cloud.iic.nchc.org.tw/vps/api/v1
     description: AI-Cloud
   - url: https://api.ai-trust.iic.nchc.org.tw/vps/api/v1
-    description: AI-Trust    
+    description: AI-Trust
+  - url: https://api.trusted-cloud.nchc.org.tw/vps/api/v1
+    description: 高安控雲
 components:
   requestBodies:
     admin.NetQoSInput:
