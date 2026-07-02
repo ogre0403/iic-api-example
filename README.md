@@ -94,6 +94,28 @@ make standalone OFFLINE=1
 
 ---
 
+### 4. macOS 桌面版 App（Tauri）
+
+GitHub Release 提供 macOS 版 `.dmg`／`.app`（Intel 與 Apple Silicon）。由於目前尚未使用 Apple 開發者憑證簽章與公證（notarize），macOS 會將從網路下載的檔案標記為 quarantine，導致開啟時出現：
+
+> **「IIC-API-Docs」已損毀，無法打開。你應該將其丟到「垃圾桶」。**
+
+是 macOS Gatekeeper 對未簽章 App 的保護機制。
+
+解法：在終端機執行以下指令移除 quarantine 標記後即可正常開啟（依實際安裝路徑調整）：
+
+```bash
+xattr -cr /Applications/IIC-API-Docs.app
+```
+
+或是先解除 App 內所有檔案的 quarantine 屬性再打開（若上面指令無效）：
+
+```bash
+xattr -dr com.apple.quarantine /Applications/IIC-API-Docs.app
+```
+
+---
+
 ## 指令速查
 
 | 指令 | 說明 |

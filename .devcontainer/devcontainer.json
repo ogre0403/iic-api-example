@@ -17,7 +17,8 @@
 				"sst-dev.opencode",
 				"Arjun.swagger-viewer",
 				"humao.rest-client",
-				"AndrewButson.vscode-openapi-viewer"
+				"AndrewButson.vscode-openapi-viewer",
+				"me-dutour-mathieu.vscode-github-actions"
 			],
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "zsh",
